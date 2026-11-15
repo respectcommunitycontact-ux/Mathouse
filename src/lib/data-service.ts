@@ -38,7 +38,7 @@ export const DataService = {
   async getMenuItems(): Promise<MenuItem[]> {
     if (isSupabaseConfigured && supabase) {
       try {
-        const { data, error } = await supabase.from('menu_items').select('*').order('name');
+        const { data, error } = await supabase.from('menu_items').select('*').order('id');
         if (!error && data && data.length > 0) return data as MenuItem[];
       } catch (e) {
         console.warn('Supabase fetch menu failed, using local storage fallback', e);
@@ -63,7 +63,19 @@ export const DataService = {
     }
 
     if (isSupabaseConfigured && supabase) {
-      await supabase.from('menu_items').upsert(item);
+      const { error } = await supabase.from('menu_items').upsert({
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        currency: item.currency ?? 'CDF',
+        category: item.category,
+        image_url: item.image_url,
+        is_available: item.is_available,
+        tags: item.tags ?? [],
+        preparation_time_minutes: item.preparation_time_minutes ?? null,
+      });
+      if (error) console.error('Supabase: enregistrement du plat impossible', error);
     }
   },
 
@@ -117,25 +129,15 @@ export const DataService = {
 
     // 1. Save or update customer
     if (orderData.customer) {
-      await this.saveCustomer(orderData.customer);
+      const saved = await this.saveCustomer(orderData.customer);
+      newOrder.customer_id = saved.id;
+      newOrder.customer = saved;
     }
 
-    // 2. Local save
-    if (typeof window !== 'undefined') {
-      const allOrders = [newOrder, ...orders];
-      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(allOrders));
-
-      // Update table status to 'occupee'
-      await this.updateTableStatus(newOrder.table_number, 'occupee');
-
-      // Realtime notification
-      this.broadcast({ type: 'NEW_ORDER', payload: newOrder });
-    }
-
-    // 3. Supabase save if configured
+    // 2. Shared database first (if it fails, nothing is saved and the customer can retry)
     if (isSupabaseConfigured && supabase) {
       try {
-        await supabase.from('orders').insert({
+        const { error: orderError } = await supabase.from('orders').insert({
           id: newOrder.id,
           order_number: newOrder.order_number,
           table_number: newOrder.table_number,
@@ -146,9 +148,10 @@ export const DataService = {
           status: newOrder.status,
           notes: newOrder.notes,
         });
+        if (orderError) throw orderError;
 
         if (newOrder.items.length > 0) {
-          await supabase.from('order_items').insert(
+          const { error: itemsError } = await supabase.from('order_items').insert(
             newOrder.items.map((it) => ({
               id: it.id,
               order_id: newOrder.id,
@@ -161,10 +164,24 @@ export const DataService = {
               special_instructions: it.special_instructions,
             }))
           );
+          if (itemsError) throw itemsError;
         }
       } catch (err) {
         console.error('Error inserting into Supabase:', err);
+        throw err;
       }
+    }
+
+    // 3. Local save + live notification on this device
+    if (typeof window !== 'undefined') {
+      const allOrders = [newOrder, ...orders];
+      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(allOrders));
+
+      // Update table status to 'occupee'
+      await this.updateTableStatus(newOrder.table_number, 'occupee');
+
+      // Realtime notification
+      this.broadcast({ type: 'NEW_ORDER', payload: newOrder });
     }
 
     return newOrder;
@@ -183,7 +200,8 @@ export const DataService = {
     }
 
     if (isSupabaseConfigured && supabase) {
-      await supabase.from('orders').update({ status, updated_at: new Date().toISOString() }).eq('id', orderId);
+      const { error } = await supabase.from('orders').update({ status, updated_at: new Date().toISOString() }).eq('id', orderId);
+      if (error) console.error('Supabase: mise à jour de la commande impossible', error);
     }
   },
 
@@ -232,7 +250,19 @@ export const DataService = {
     }
 
     if (isSupabaseConfigured && supabase) {
-      await supabase.from('customers').upsert(finalCust, { onConflict: 'whatsapp' });
+      const { error } = await supabase.from('customers').upsert(
+        {
+          id: finalCust.id,
+          full_name: finalCust.full_name,
+          whatsapp: finalCust.whatsapp,
+          notes: finalCust.notes ?? null,
+          total_orders: finalCust.total_orders,
+          last_visit: finalCust.last_visit,
+          created_at: finalCust.created_at,
+        },
+        { onConflict: 'whatsapp' }
+      );
+      if (error) console.error('Supabase: enregistrement du client impossible', error);
     }
 
     return finalCust;
@@ -240,12 +270,29 @@ export const DataService = {
 
   // --- TABLES ---
   async getTables(): Promise<TableRecord[]> {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase.from('tables').select('*').order('number');
+        if (!error && data && data.length > 0) return data as TableRecord[];
+      } catch (e) {
+        console.warn('Supabase fetch tables failed, using local storage fallback', e);
+      }
+    }
     if (typeof window === 'undefined') return INITIAL_TABLES;
     const raw = localStorage.getItem(STORAGE_KEYS.TABLES);
     return raw ? JSON.parse(raw) : INITIAL_TABLES;
   },
 
   async updateTableStatus(tableNumber: number, status: TableRecord['status']): Promise<void> {
+    if (isSupabaseConfigured && supabase) {
+      const { error } = await supabase
+        .from('tables')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('number', tableNumber);
+      if (error) console.error('Supabase: mise à jour de la table impossible', error);
+      this.broadcast({ type: 'TABLE_STATUS_CHANGED', payload: { tableNumber, status } });
+      return;
+    }
     const tables = await this.getTables();
     const table = tables.find((t) => t.number === tableNumber);
     if (table) {
@@ -259,6 +306,14 @@ export const DataService = {
   },
 
   async updateTabletHeartbeat(tableNumber: number, batteryLevel?: number, isCharging?: boolean): Promise<void> {
+    if (isSupabaseConfigured && supabase) {
+      const patch: Record<string, unknown> = { is_online: true, updated_at: new Date().toISOString() };
+      if (typeof batteryLevel === 'number') patch.battery_level = batteryLevel;
+      if (typeof isCharging === 'boolean') patch.is_charging = isCharging;
+      const { error } = await supabase.from('tables').update(patch).eq('number', tableNumber);
+      if (error) console.error('Supabase: état de la tablette non envoyé', error);
+      return;
+    }
     const tables = await this.getTables();
     let table = tables.find((t) => t.number === tableNumber);
     if (!table) {
@@ -315,12 +370,20 @@ export const DataService = {
     // Realtime Supabase listener if configured
     let supabaseChannel: ReturnType<NonNullable<typeof supabase>['channel']> | null = null;
     if (isSupabaseConfigured && supabase) {
-      supabaseChannel = supabase
-        .channel('resto-global-channel')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
-          callback({ type: 'SUPABASE_ORDER_CHANGE', payload });
-        })
-        .subscribe();
+      const map: Record<string, string> = {
+        orders: 'SUPABASE_ORDER_CHANGE',
+        order_items: 'SUPABASE_ORDER_CHANGE',
+        tables: 'TABLE_STATUS_CHANGED',
+        menu_items: 'MENU_UPDATED',
+        customers: 'CUSTOMER_UPDATED',
+      };
+      let channel = supabase.channel(`resto-${Math.random().toString(36).slice(2)}`);
+      for (const table of Object.keys(map)) {
+        channel = channel.on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
+          callback({ type: map[table], payload: { ...payload, table } });
+        });
+      }
+      supabaseChannel = channel.subscribe();
     }
 
     return () => {

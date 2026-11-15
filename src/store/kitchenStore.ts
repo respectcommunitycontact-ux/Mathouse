@@ -16,6 +16,9 @@ interface KitchenState {
   initRealtime: () => () => void;
 }
 
+// Several database events arrive for one order (the order, then each dish): refresh once
+let refreshTimer: ReturnType<typeof setTimeout> | null = null;
+
 export const useKitchenStore = create<KitchenState>((set, get) => ({
   orders: [],
   isLoading: true,
@@ -56,9 +59,17 @@ export const useKitchenStore = create<KitchenState>((set, get) => ({
           orders: state.orders.map((o) => (o.id === orderId ? { ...o, status } : o)),
         }));
       } else if (event.type === 'SUPABASE_ORDER_CHANGE') {
-        // Refresh orders on remote DB change
-        const orders = await DataService.getOrders();
-        set({ orders });
+        const change = event.payload as { eventType?: string; table?: string; new?: { id?: string } };
+        // New order from another tablet: ring the kitchen
+        if (change.table === 'orders' && change.eventType === 'INSERT') {
+          const id = change.new?.id;
+          if (!id || !get().orders.some((o) => o.id === id)) playOrderChime();
+        }
+        if (refreshTimer) clearTimeout(refreshTimer);
+        refreshTimer = setTimeout(async () => {
+          const orders = await DataService.getOrders();
+          set({ orders });
+        }, 500);
       }
     });
 
