@@ -10,6 +10,10 @@ const STORAGE_KEYS = {
   CONFIG: 'resto_tablet_config_v1',
 };
 
+/** True when Supabase says the database function does not exist yet (security script not run). */
+const isMissingFunction = (error: { code?: string; message?: string }) =>
+  error.code === 'PGRST202' || error.code === '42883' || /could not find the function/i.test(error.message ?? '');
+
 // Cross-tab real-time sync channel
 let broadcastChannel: BroadcastChannel | null = null;
 if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
@@ -109,17 +113,14 @@ export const DataService = {
   },
 
   async createOrder(orderData: Omit<Order, 'id' | 'order_number' | 'created_at' | 'updated_at'>): Promise<Order> {
-    const orders = await this.getOrders();
-    const orderCount = orders.length + 1;
-    const orderNumber = `CMD-${String(orderCount).padStart(3, '0')}`;
+    const now = new Date().toISOString();
     const newOrderId = `ord-${Date.now()}`;
-
     const newOrder: Order = {
       ...orderData,
       id: newOrderId,
-      order_number: orderNumber,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      order_number: '',
+      created_at: now,
+      updated_at: now,
       items: orderData.items.map((it, idx) => ({
         ...it,
         id: `item-${Date.now()}-${idx}`,
@@ -127,65 +128,103 @@ export const DataService = {
       })),
     };
 
-    // 1. Save or update customer
-    if (orderData.customer) {
-      const saved = await this.saveCustomer(orderData.customer);
-      newOrder.customer_id = saved.id;
-      newOrder.customer = saved;
-    }
-
-    // 2. Shared database first (if it fails, nothing is saved and the customer can retry)
     if (isSupabaseConfigured && supabase) {
-      try {
-        const { error: orderError } = await supabase.from('orders').insert({
+      // Secure path: the database checks the order and takes prices from the menu itself.
+      const { data, error } = await supabase.rpc('place_order', {
+        p: {
           id: newOrder.id,
-          order_number: newOrder.order_number,
           table_number: newOrder.table_number,
           people_count: newOrder.people_count,
-          customer_id: newOrder.customer_id,
-          total: newOrder.total,
-          total_usd: newOrder.total_usd ?? null,
-          status: newOrder.status,
-          notes: newOrder.notes,
-        });
-        if (orderError) throw orderError;
+          notes: newOrder.notes ?? null,
+          customer: newOrder.customer
+            ? { full_name: newOrder.customer.full_name, whatsapp: newOrder.customer.whatsapp }
+            : null,
+          items: newOrder.items.map((it) => ({
+            id: it.id,
+            menu_item_id: it.menu_item_id,
+            quantity: it.quantity,
+            person_label: it.person_label,
+            special_instructions: it.special_instructions ?? null,
+          })),
+        },
+      });
 
-        if (newOrder.items.length > 0) {
-          const { error: itemsError } = await supabase.from('order_items').insert(
-            newOrder.items.map((it) => ({
-              id: it.id,
-              order_id: newOrder.id,
-              menu_item_id: it.menu_item_id,
-              item_name: it.item_name,
-              item_price: it.item_price,
-              currency: it.currency ?? 'CDF',
-              quantity: it.quantity,
-              person_label: it.person_label,
-              special_instructions: it.special_instructions,
-            }))
-          );
-          if (itemsError) throw itemsError;
-        }
-      } catch (err) {
-        console.error('Error inserting into Supabase:', err);
-        throw err;
+      if (!error && data) {
+        const res = data as { order_number: string; customer_id: string | null; total: number; total_usd: number | null };
+        newOrder.order_number = res.order_number;
+        newOrder.customer_id = res.customer_id ?? undefined;
+        newOrder.total = Number(res.total);
+        newOrder.total_usd = res.total_usd ? Number(res.total_usd) : undefined;
+      } else if (error && isMissingFunction(error)) {
+        // Database not yet updated with the security script: previous behaviour
+        await this.legacyInsertOrder(newOrder);
+      } else {
+        console.error('Supabase: commande refusée', error);
+        throw error;
+      }
+    } else {
+      const orders = await this.getOrders();
+      newOrder.order_number = `CMD-${String(orders.length + 1).padStart(3, '0')}`;
+      if (orderData.customer) {
+        const saved = await this.saveCustomer(orderData.customer);
+        newOrder.customer_id = saved.id;
+        newOrder.customer = saved;
       }
     }
 
-    // 3. Local save + live notification on this device
+    // Local copy + live notification on this device
     if (typeof window !== 'undefined') {
-      const allOrders = [newOrder, ...orders];
-      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(allOrders));
-
-      // Update table status to 'occupee'
-      await this.updateTableStatus(newOrder.table_number, 'occupee');
-
-      // Realtime notification
+      const raw = localStorage.getItem(STORAGE_KEYS.ORDERS);
+      const local: Order[] = raw ? JSON.parse(raw) : [];
+      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify([newOrder, ...local].slice(0, 200)));
+      if (!isSupabaseConfigured) await this.updateTableStatus(newOrder.table_number, 'occupee');
       this.broadcast({ type: 'NEW_ORDER', payload: newOrder });
     }
 
     return newOrder;
   },
+
+  /** Direct inserts, used only until the security script has been run in Supabase. */
+  async legacyInsertOrder(newOrder: Order): Promise<void> {
+    if (!supabase) return;
+    const orders = await this.getOrders();
+    newOrder.order_number = `CMD-${String(orders.length + 1).padStart(3, '0')}`;
+    if (newOrder.customer) {
+      const saved = await this.saveCustomer(newOrder.customer);
+      newOrder.customer_id = saved.id;
+      newOrder.customer = saved;
+    }
+    const { error: orderError } = await supabase.from('orders').insert({
+      id: newOrder.id,
+      order_number: newOrder.order_number,
+      table_number: newOrder.table_number,
+      people_count: newOrder.people_count,
+      customer_id: newOrder.customer_id,
+      total: newOrder.total,
+      total_usd: newOrder.total_usd ?? null,
+      status: newOrder.status,
+      notes: newOrder.notes,
+    });
+    if (orderError) throw orderError;
+    if (newOrder.items.length > 0) {
+      const { error: itemsError } = await supabase.from('order_items').insert(
+        newOrder.items.map((it) => ({
+          id: it.id,
+          order_id: newOrder.id,
+          menu_item_id: it.menu_item_id,
+          item_name: it.item_name,
+          item_price: it.item_price,
+          currency: it.currency ?? 'CDF',
+          quantity: it.quantity,
+          person_label: it.person_label,
+          special_instructions: it.special_instructions,
+        }))
+      );
+      if (itemsError) throw itemsError;
+    }
+    await this.updateTableStatus(newOrder.table_number, 'occupee');
+  },
+
 
   async updateOrderStatus(orderId: string, status: OrderStatus): Promise<void> {
     if (typeof window !== 'undefined') {
@@ -285,10 +324,13 @@ export const DataService = {
 
   async updateTableStatus(tableNumber: number, status: TableRecord['status']): Promise<void> {
     if (isSupabaseConfigured && supabase) {
-      const { error } = await supabase
-        .from('tables')
-        .update({ status, updated_at: new Date().toISOString() })
-        .eq('number', tableNumber);
+      let { error } = await supabase.rpc('set_table_status', { p_number: tableNumber, p_status: status });
+      if (error && isMissingFunction(error)) {
+        ({ error } = await supabase
+          .from('tables')
+          .update({ status, updated_at: new Date().toISOString() })
+          .eq('number', tableNumber));
+      }
       if (error) console.error('Supabase: mise à jour de la table impossible', error);
       this.broadcast({ type: 'TABLE_STATUS_CHANGED', payload: { tableNumber, status } });
       return;
@@ -307,10 +349,17 @@ export const DataService = {
 
   async updateTabletHeartbeat(tableNumber: number, batteryLevel?: number, isCharging?: boolean): Promise<void> {
     if (isSupabaseConfigured && supabase) {
-      const patch: Record<string, unknown> = { is_online: true, updated_at: new Date().toISOString() };
-      if (typeof batteryLevel === 'number') patch.battery_level = batteryLevel;
-      if (typeof isCharging === 'boolean') patch.is_charging = isCharging;
-      const { error } = await supabase.from('tables').update(patch).eq('number', tableNumber);
+      let { error } = await supabase.rpc('tablet_heartbeat', {
+        p_number: tableNumber,
+        p_battery: typeof batteryLevel === 'number' ? batteryLevel : null,
+        p_charging: typeof isCharging === 'boolean' ? isCharging : null,
+      });
+      if (error && isMissingFunction(error)) {
+        const patch: Record<string, unknown> = { is_online: true, updated_at: new Date().toISOString() };
+        if (typeof batteryLevel === 'number') patch.battery_level = batteryLevel;
+        if (typeof isCharging === 'boolean') patch.is_charging = isCharging;
+        ({ error } = await supabase.from('tables').update(patch).eq('number', tableNumber));
+      }
       if (error) console.error('Supabase: état de la tablette non envoyé', error);
       return;
     }

@@ -36,24 +36,6 @@ export default function TablesManagementPage() {
       }
     });
 
-    // Detect actual hardware battery via Web Battery API
-    if (typeof navigator !== 'undefined' && 'getBattery' in navigator) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (navigator as any)
-        .getBattery()
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .then((battery: any) => {
-          const sync = () => {
-            const level = Math.round(battery.level * 100);
-            DataService.updateTabletHeartbeat(1, level, battery.charging);
-            loadTables();
-          };
-          sync();
-          battery.addEventListener('levelchange', sync);
-          battery.addEventListener('chargingchange', sync);
-        })
-        .catch(() => {});
-    }
 
     return () => unsubscribe();
   }, []);
