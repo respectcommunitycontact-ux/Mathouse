@@ -61,7 +61,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus }) =
       } ${isServed ? 'opacity-80' : ''}`}
     >
       {/* Header */}
-      <header className={`px-4 py-3 flex items-center justify-between gap-3 border-b border-slate-100 ${late ? 'border-l-4 border-l-rose-500' : warn ? 'border-l-4 border-l-amber-400' : ''}`}>
+      <header className="px-4 py-3 flex items-center justify-between gap-3 border-b border-slate-100">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-12 h-12 rounded-lg bg-slate-900 text-white flex flex-col items-center justify-center shrink-0">
             <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-400 leading-none">Table</span>
