@@ -3,26 +3,23 @@
 import React, { useEffect, useState } from 'react';
 import { useKitchenStore } from '@/store/kitchenStore';
 import { OrderCard } from './OrderCard';
-import { Order, OrderStatus } from '@/types';
-import { 
-  Sparkles, 
-  CheckCircle, 
-  Search, 
-  RefreshCw 
-} from 'lucide-react';
+import { Order } from '@/types';
+import { CheckCircle2, Flame, Search, RefreshCw } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
+import { CountPill, EmptyState, PageContainer, PageHeader, btn, inputClass } from './ui';
+
+type ColumnId = 'nouvelle' | 'servie';
 
 export const KitchenKanban: React.FC = () => {
   const { orders, isLoading, fetchOrders, updateStatus, initRealtime } = useKitchenStore();
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeMobileColumn, setActiveMobileColumn] = useState<'nouvelle' | 'servie'>('nouvelle');
+  const [activeMobileColumn, setActiveMobileColumn] = useState<ColumnId>('nouvelle');
 
   useEffect(() => {
     const unsubscribe = initRealtime();
     return () => unsubscribe();
   }, [initRealtime]);
 
-  // Filter orders by search query
   const filteredOrders = orders.filter((o) => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
@@ -32,44 +29,42 @@ export const KitchenKanban: React.FC = () => {
     return matchesTable || matchesNumber || matchesCustomer;
   });
 
-  const columns: { 
-    id: 'nouvelle' | 'servie'; 
-    title: string; 
-    shortTitle: string;
-    subtitle: string; 
-    icon: React.ReactNode; 
-    iconBg: string;
+  const columns: {
+    id: ColumnId;
+    title: string;
+    help: string;
+    icon: React.ReactNode;
+    accent: string;
     filter: (order: Order) => boolean;
-    getBadgeStyle: (count: number) => string;
+    sort: (a: Order, b: Order) => number;
+    emptyTitle: string;
+    emptyHint: string;
   }[] = [
     {
       id: 'nouvelle',
-      title: 'Nouvelles Commandes',
-      shortTitle: 'Nouvelles',
-      subtitle: 'À préparer et envoyer en salle',
-      icon: <Sparkles className="w-4 h-4 text-[#D4AF37]" />,
-      iconBg: 'bg-[#D4AF37]/15 border-[#D4AF37]/30 text-[#D4AF37]',
+      title: 'À préparer',
+      help: 'Les plus anciennes en haut. Une fois le plat envoyé en salle, cliquez sur « Marquer servie ».',
+      icon: <Flame className="w-4 h-4" />,
+      accent: 'text-[#C2410C] bg-orange-50',
       filter: (o) => o.status !== 'servie' && o.status !== 'annulee',
-      getBadgeStyle: (count) => count > 0 
-        ? 'bg-[#D4AF37] text-[#0B1017] shadow-[0_2px_8px_rgba(212,175,55,0.45)]' 
-        : 'bg-white/5 text-slate-500 border border-white/10',
+      sort: (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+      emptyTitle: 'Rien à préparer',
+      emptyHint: 'Les nouvelles commandes des tablettes s’afficheront ici avec un signal sonore.',
     },
     {
       id: 'servie',
-      title: 'Commandes Servies',
-      shortTitle: 'Servies',
-      subtitle: 'Livrées aux clients en salle',
-      icon: <CheckCircle className="w-4 h-4 text-emerald-400" />,
-      iconBg: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400',
+      title: 'Servies',
+      help: 'Historique du service. Une erreur ? « Remettre à préparer » la renvoie à gauche.',
+      icon: <CheckCircle2 className="w-4 h-4" />,
+      accent: 'text-emerald-700 bg-emerald-50',
       filter: (o) => o.status === 'servie',
-      getBadgeStyle: (count) => count > 0 
-        ? 'bg-emerald-400 text-[#0B1017] shadow-[0_2px_8px_rgba(52,211,153,0.4)]' 
-        : 'bg-white/5 text-slate-500 border border-white/10',
+      sort: (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      emptyTitle: 'Aucune commande servie',
+      emptyHint: 'Les commandes marquées servies apparaîtront ici.',
     },
   ];
 
-  // Drag and drop handler
-  const handleDrop = (e: React.DragEvent, targetStatus: 'nouvelle' | 'servie') => {
+  const handleDrop = (e: React.DragEvent, targetStatus: ColumnId) => {
     e.preventDefault();
     const orderId = e.dataTransfer.getData('text/plain');
     if (orderId) {
@@ -78,61 +73,81 @@ export const KitchenKanban: React.FC = () => {
     }
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
   const activeCount = orders.filter((o) => o.status !== 'servie' && o.status !== 'annulee').length;
   const servedCount = orders.filter((o) => o.status === 'servie').length;
 
+  const renderColumn = (col: (typeof columns)[number]) => {
+    const colOrders = filteredOrders.filter(col.filter).sort(col.sort);
+    return (
+      <section
+        key={col.id}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => handleDrop(e, col.id)}
+        className="flex flex-col bg-slate-100/70 rounded-xl border border-slate-200 min-h-[420px]"
+      >
+        <header className="px-4 py-3 border-b border-slate-200 flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${col.accent}`}>{col.icon}</span>
+            <div className="min-w-0">
+              <h2 className="text-base font-semibold text-slate-900">{col.title}</h2>
+              <p className="text-xs text-slate-500 mt-0.5">{col.help}</p>
+            </div>
+          </div>
+          <CountPill tone={col.id === 'nouvelle' && colOrders.length > 0 ? 'brand' : 'neutral'}>{colOrders.length}</CountPill>
+        </header>
+        <div className="p-3 space-y-3 flex-1">
+          {colOrders.length === 0 ? (
+            <div className="h-full rounded-lg border-2 border-dashed border-slate-200 bg-white/60">
+              <EmptyState title={col.emptyTitle} hint={col.emptyHint} />
+            </div>
+          ) : (
+            colOrders.map((order) => <OrderCard key={order.id} order={order} onUpdateStatus={updateStatus} />)
+          )}
+        </div>
+      </section>
+    );
+  };
+
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#0B0E14]/75 backdrop-blur-sm select-none overflow-hidden text-slate-100">
-      {/* Kanban Sub-Header & Search Controls */}
-      <div className="glass-panel border-b border-[#D4AF37]/20 px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0 shadow-lg">
-        <div className="flex items-center justify-between sm:justify-start space-x-4">
-          <div className="flex items-center space-x-2.5 text-xs font-extrabold text-[#D4AF37] uppercase tracking-widest">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37] animate-ping" />
-            <span>KDS &bull; FLUX CUISINE DIRECT</span>
-          </div>
+    <PageContainer>
+      <PageHeader
+        title="Commandes"
+        description="Toutes les commandes passées depuis les tablettes. Vous pouvez aussi glisser une carte d’une colonne à l’autre."
+        meta={
+          <>
+            <CountPill tone="brand">{activeCount} à préparer</CountPill>
+            <CountPill tone="success">{servedCount} servies</CountPill>
+          </>
+        }
+        actions={
+          <>
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Table, client ou n° de commande"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={`${inputClass} pl-9`}
+              />
+            </div>
+            <button
+              onClick={() => {
+                playTapSound();
+                fetchOrders();
+              }}
+              className={btn.secondary}
+              title="Recharger les commandes"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              Actualiser
+            </button>
+          </>
+        }
+      />
 
-          <button
-            onClick={() => {
-              playTapSound();
-              fetchOrders();
-            }}
-            className="p-2 rounded-full bg-[#121824] hover:bg-[#1A2234] text-slate-300 border border-white/15 hover:text-white transition-all active:scale-95 shadow-md"
-            title="Rafraîchir les commandes"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#D4AF37]' : ''}`} />
-          </button>
-        </div>
-
-        {/* Search & Stats Summary */}
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-64 md:w-80">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#D4AF37]" />
-            <input
-              type="text"
-              placeholder="Rechercher Table, Client, #CMD..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 text-xs rounded-full bg-[#0B0E14] border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-[#D4AF37] transition-all"
-            />
-          </div>
-
-          <div className="hidden sm:flex items-center gap-2.5 text-xs">
-            <span className="px-3.5 py-1.5 rounded-full bg-[#D4AF37]/15 text-[#E5C158] border border-[#D4AF37]/40 font-extrabold whitespace-nowrap shadow-gold-subtle">
-              {activeCount} à préparer
-            </span>
-            <span className="px-3.5 py-1.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 font-extrabold whitespace-nowrap">
-              {servedCount} servies
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Column Segmented Switcher (< md) */}
-      <div className="md:hidden px-3 pt-2.5 pb-2.5 grid grid-cols-2 gap-2 bg-[#0E1420] border-b border-white/10 shrink-0">
+      {/* Mobile: one column at a time */}
+      <div className="md:hidden grid grid-cols-2 gap-1 p-1 mb-4 rounded-lg bg-slate-200/70">
         {columns.map((col) => {
           const count = filteredOrders.filter(col.filter).length;
           const isActive = activeMobileColumn === col.id;
@@ -143,122 +158,20 @@ export const KitchenKanban: React.FC = () => {
                 playTapSound();
                 setActiveMobileColumn(col.id);
               }}
-              className={`min-h-[44px] px-4 py-2 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
-                isActive
-                  ? 'bg-gradient-to-r from-[#D4AF37] to-[#E5C158] text-[#0B0E14] shadow-gold-subtle font-extrabold'
-                  : 'bg-[#121824] text-slate-300 hover:text-white border border-white/10'
+              className={`h-10 rounded-md text-sm font-semibold flex items-center justify-center gap-2 transition ${
+                isActive ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600'
               }`}
             >
-              <span>{col.title}</span>
-              <span className={`w-5 h-5 rounded-full text-[10px] font-mono flex items-center justify-center font-extrabold ${
-                isActive ? 'bg-[#0B0E14] text-[#D4AF37]' : 'bg-white/10 text-white'
-              }`}>
-                {count}
-              </span>
+              {col.title}
+              <span className="text-xs text-slate-500">({count})</span>
             </button>
           );
         })}
       </div>
+      <div className="md:hidden">{renderColumn(columns.find((c) => c.id === activeMobileColumn) || columns[0])}</div>
 
-      {/* Mobile Single Column View (< md) */}
-      <div className="md:hidden flex-1 p-3 overflow-y-auto custom-scrollbar">
-        {(() => {
-          const activeCol = columns.find((c) => c.id === activeMobileColumn) || columns[0];
-          const colOrders = filteredOrders.filter(activeCol.filter);
-
-          return (
-            <div className="flex flex-col bg-[#121824] rounded-3xl border border-white/10 p-4 shadow-2xl min-h-full">
-              {/* Column Header */}
-              <div className="flex items-center justify-between pb-3.5 mb-3.5 border-b border-white/[0.08] gap-3">
-                <div className="flex items-center space-x-3 min-w-0">
-                  <div className={`w-9 h-9 rounded-2xl border flex items-center justify-center shrink-0 shadow-sm ${activeCol.iconBg}`}>
-                    {activeCol.icon}
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-bold text-white tracking-wide truncate">{activeCol.title}</h3>
-                    <span className="text-[11px] text-slate-400 block font-light truncate">{activeCol.subtitle}</span>
-                  </div>
-                </div>
-
-                <span className={`min-w-[28px] h-7 px-2.5 rounded-full font-mono font-extrabold text-xs flex items-center justify-center shrink-0 ${activeCol.getBadgeStyle(colOrders.length)}`}>
-                  {colOrders.length}
-                </span>
-              </div>
-
-              {/* Orders List */}
-              <div className="space-y-4 flex-1">
-                {colOrders.length === 0 ? (
-                  <div className="py-16 border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-slate-500 text-xs bg-white/[0.01]">
-                    <span className="font-semibold text-slate-400">Aucune commande dans cette section</span>
-                    <span className="text-[11px] text-slate-500 mt-1">En attente des convives en salle</span>
-                  </div>
-                ) : (
-                  colOrders.map((order) => (
-                    <OrderCard
-                      key={order.id}
-                      order={order}
-                      onUpdateStatus={updateStatus}
-                    />
-                  ))
-                )}
-              </div>
-            </div>
-          );
-        })()}
-      </div>
-
-      {/* Desktop 2-Column Kanban Board (>= md) */}
-      <div className="hidden md:flex flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-        <div className="grid grid-cols-2 gap-5 lg:gap-8 h-full w-full">
-          {columns.map((col) => {
-            const colOrders = filteredOrders.filter(col.filter);
-
-            return (
-              <div
-                key={col.id}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, col.id)}
-                className="flex flex-col bg-[#121824] rounded-3xl border border-[#D4AF37]/20 p-5 lg:p-6 overflow-hidden h-full shadow-2xl"
-              >
-                {/* Column Header */}
-                <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/[0.08] gap-3">
-                  <div className="flex items-center space-x-3.5 min-w-0">
-                    <div className={`w-10 h-10 rounded-2xl border flex items-center justify-center shrink-0 shadow-md ${col.iconBg}`}>
-                      {col.icon}
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="text-base font-serif font-bold text-white tracking-wide truncate">{col.title}</h3>
-                      <span className="text-xs text-slate-400 block font-light mt-0.5 truncate">{col.subtitle}</span>
-                    </div>
-                  </div>
-
-                  <span className={`min-w-[32px] h-8 px-3 rounded-full font-mono font-extrabold text-xs flex items-center justify-center shrink-0 transition-all ${col.getBadgeStyle(colOrders.length)}`}>
-                    {colOrders.length}
-                  </span>
-                </div>
-
-                {/* Orders List Container */}
-                <div className="flex-1 overflow-y-auto space-y-4 pr-1.5 custom-scrollbar">
-                  {colOrders.length === 0 ? (
-                    <div className="h-52 border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-slate-500 text-xs bg-white/[0.01]">
-                      <span className="font-semibold text-slate-400">Aucune commande {col.title.toLowerCase()}</span>
-                      <span className="text-[11px] text-slate-500 mt-1">Les nouvelles commandes s&apos;afficheront automatiquement ici</span>
-                    </div>
-                  ) : (
-                    colOrders.map((order) => (
-                      <OrderCard
-                        key={order.id}
-                        order={order}
-                        onUpdateStatus={updateStatus}
-                      />
-                    ))
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
+      {/* Desktop: two columns */}
+      <div className="hidden md:grid grid-cols-2 gap-5">{columns.map(renderColumn)}</div>
+    </PageContainer>
   );
 };

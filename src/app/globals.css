@@ -160,3 +160,14 @@ body {
   background: rgba(212, 175, 55, 0.4);
 }
 
+
+/* Admin console: readable scrollbars on the light theme */
+.admin-theme ::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.18);
+}
+.admin-theme ::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.32);
+}
+.admin-theme {
+  font-feature-settings: 'tnum' 1;
+}
