@@ -18,17 +18,23 @@ export const useAdminAuth = () => useContext(AdminAuthContext);
 type Access = 'checking' | 'staff' | 'not-staff';
 
 /**
+ * Staff login is switched on with the Vercel variable NEXT_PUBLIC_ADMIN_LOGIN = on.
+ * During the test phase it stays off so the admin and kitchen screens open directly.
+ */
+const LOGIN_REQUIRED = isSupabaseConfigured && process.env.NEXT_PUBLIC_ADMIN_LOGIN === 'on';
+
+/**
  * Protects every /admin page.
  * - Supabase configured: staff must sign in (email + password) and be listed in the « staff » table.
- * - No Supabase (local demo mode): pages stay open, as before.
+ * - No Supabase (local demo mode) or NEXT_PUBLIC_ADMIN_LOGIN not set to « on »: pages stay open.
  */
 export const AdminAuthGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
-  const [ready, setReady] = useState(!isSupabaseConfigured);
+  const [ready, setReady] = useState(!LOGIN_REQUIRED);
   const [access, setAccess] = useState<Access>('checking');
 
   useEffect(() => {
-    if (!supabase) return;
+    if (!supabase || !LOGIN_REQUIRED) return;
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setReady(true);
@@ -39,7 +45,7 @@ export const AdminAuthGate: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Is this account part of the staff?
   useEffect(() => {
-    if (!supabase || !session) return;
+    if (!supabase || !session || !LOGIN_REQUIRED) return;
     setAccess('checking');
     supabase
       .from('staff')
@@ -61,7 +67,7 @@ export const AdminAuthGate: React.FC<{ children: React.ReactNode }> = ({ childre
     await supabase?.auth.signOut();
   };
 
-  if (!isSupabaseConfigured) {
+  if (!LOGIN_REQUIRED) {
     return <AdminAuthContext.Provider value={{ email: null, signOut }}>{children}</AdminAuthContext.Provider>;
   }
 
