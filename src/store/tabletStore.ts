@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { KioskScreen, TabletConfig } from '@/types';
 import { DataService } from '@/lib/data-service';
+import { useCartStore } from '@/store/cartStore';
 
 interface CustomerSession {
   fullName: string;
@@ -36,6 +37,10 @@ interface TabletState {
   setLastOrderInfo: (orderId: string, orderNumber: string) => void;
   resetSessionForNewRound: () => void; // Keep customer if within 30 min, reset cart and screen
   fullResetSession: () => void;
+  /** La serveuse choisit la table : nouvelle session client propre, puis écran d'accueil client */
+  startTableSession: (tableNumber: number) => void;
+  /** Le client rend la tablette : on vide tout et on revient au choix de table */
+  handBackToWaiter: () => void;
   callWaiter: () => Promise<void>;
   requestBill: () => Promise<void>;
 }
@@ -54,7 +59,7 @@ export const useTabletStore = create<TabletState>((set, get) => ({
   isScreensaverActive: false,
   isAdminPinOpen: false,
   isSettingsOpen: false,
-  activeScreen: 'welcome',
+  activeScreen: 'table-picker',
   peopleCount: 1,
   selectedGuestForAdd: 'Personne 1',
   customerSession: null,
@@ -130,6 +135,43 @@ export const useTabletStore = create<TabletState>((set, get) => ({
   fullResetSession: () => {
     set({
       activeScreen: 'welcome',
+      peopleCount: 1,
+      customerSession: null,
+      selectedGuestForAdd: 'Personne 1',
+      lastOrderId: null,
+      lastOrderNumber: null,
+    });
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('customer_session');
+    }
+  },
+
+  startTableSession: (tableNumber: number) => {
+    get().setTableNumber(tableNumber);
+    useCartStore.getState().clearCart();
+    set({
+      activeScreen: 'welcome',
+      peopleCount: 1,
+      customerSession: null,
+      selectedGuestForAdd: 'Personne 1',
+      lastOrderId: null,
+      lastOrderNumber: null,
+    });
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('customer_session');
+    }
+    // A table that was free is now taken by these clients
+    DataService.getTables().then((tables) => {
+      const t = tables.find((x) => x.number === tableNumber);
+      if (t && t.status === 'libre') DataService.updateTableStatus(tableNumber, 'occupee');
+    });
+  },
+
+  handBackToWaiter: () => {
+    useCartStore.getState().clearCart();
+    useCartStore.getState().setDrawerOpen(false);
+    set({
+      activeScreen: 'table-picker',
       peopleCount: 1,
       customerSession: null,
       selectedGuestForAdd: 'Personne 1',

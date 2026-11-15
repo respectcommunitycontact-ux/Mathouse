@@ -8,7 +8,8 @@ import {
   Receipt, 
   Bell, 
   Clock, 
-  Sparkles 
+  Sparkles,
+  HandPlatter,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playTapSound } from '@/lib/sound';
@@ -19,6 +20,7 @@ export const OrderConfirmation: React.FC = () => {
     lastOrderNumber, 
     customerSession, 
     resetSessionForNewRound, 
+    handBackToWaiter,
     requestBill, 
     callWaiter 
   } = useTabletStore();
@@ -43,6 +45,11 @@ export const OrderConfirmation: React.FC = () => {
   const handleOrderMore = () => {
     playTapSound();
     resetSessionForNewRound();
+  };
+
+  const handleHandBack = () => {
+    playTapSound();
+    handBackToWaiter();
   };
 
   const handleRequestBill = async () => {
@@ -125,6 +132,15 @@ export const OrderConfirmation: React.FC = () => {
             </p>
           </div>
         </div>
+
+        {/* Main action: give the tablet back to the waitress */}
+        <button
+          onClick={handleHandBack}
+          className="w-full max-w-md mx-auto mb-3.5 min-h-[60px] py-4 px-6 rounded-full bg-[#E85D04] hover:bg-[#F06A10] text-white font-extrabold text-sm sm:text-base shadow-lg flex items-center justify-center gap-2.5 transition-all active:scale-[0.98]"
+        >
+          <HandPlatter className="w-5 h-5" />
+          <span>C’est terminé : rendre la tablette au serveur</span>
+        </button>
 
         {/* Action Capsule Buttons */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-w-md mx-auto">

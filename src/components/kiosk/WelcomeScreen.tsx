@@ -3,12 +3,12 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useTabletStore } from '@/store/tabletStore';
-import { User, Users, Bell, Sparkles, UtensilsCrossed, ArrowRight } from 'lucide-react';
+import { User, Users, Bell, Sparkles, UtensilsCrossed, ArrowRight, ArrowLeftRight } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
 import { enterFullscreen } from '@/lib/pwa';
 
 export const WelcomeScreen: React.FC = () => {
-  const { config, setPeopleCount, setActiveScreen, callWaiter } = useTabletStore();
+  const { config, setPeopleCount, setActiveScreen, callWaiter, handBackToWaiter } = useTabletStore();
   const [waiterCalled, setWaiterCalled] = useState(false);
 
   const handleSolo = () => {
@@ -143,8 +143,19 @@ export const WelcomeScreen: React.FC = () => {
 
       {/* Bottom Footer Bar */}
       <div className="relative z-10 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-400/80 border-t border-white/[0.08] pt-3 shrink-0">
-        <span className="font-serif italic text-slate-300">MAT HOUSE RESTAURANT &bull; Grande Gastronomie &amp; Service d&apos;Exception</span>
-        <span className="mt-1 sm:mt-0 font-mono text-[11px] text-slate-500">RestoTablet Pro &bull; Kiosque Tablette</span>
+        <span className="font-serif italic text-slate-300">MAT HOUSE RESTAURANT</span>
+        <button
+          type="button"
+          onClick={() => {
+            playTapSound();
+            handBackToWaiter();
+          }}
+          className="mt-2 sm:mt-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 border border-white/10 transition"
+          title="Réservé au serveur : revenir au choix de la table"
+        >
+          <ArrowLeftRight className="w-3.5 h-3.5" />
+          Serveur : changer de table
+        </button>
       </div>
     </div>
   );

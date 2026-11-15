@@ -7,6 +7,7 @@ import { Screensaver } from '@/components/kiosk/Screensaver';
 import { AdminPinModal, HiddenAdminTrigger } from '@/components/kiosk/AdminPinModal';
 import { TabletSettingsModal } from '@/components/kiosk/TabletSettingsModal';
 import { WelcomeScreen } from '@/components/kiosk/WelcomeScreen';
+import { TablePicker } from '@/components/kiosk/TablePicker';
 import { PeoplePicker } from '@/components/kiosk/PeoplePicker';
 import { MenuCatalog } from '@/components/kiosk/MenuCatalog';
 import { FloatingCart } from '@/components/kiosk/FloatingCart';
@@ -147,6 +148,7 @@ export default function TabletKioskPage() {
 
       {/* 5. ACTIVE SCREEN FLOW */}
       <div className="w-full h-full">
+        {activeScreen === 'table-picker' && <TablePicker />}
         {activeScreen === 'welcome' && <WelcomeScreen />}
         {activeScreen === 'people-picker' && <PeoplePicker />}
         {activeScreen === 'menu' && (
