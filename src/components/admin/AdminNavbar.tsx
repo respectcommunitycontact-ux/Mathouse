@@ -63,7 +63,7 @@ export const AdminNavbar: React.FC = () => {
     },
     {
       href: '/admin/tables',
-      label: 'Salle & tablettes',
+      label: 'Salle',
       shortLabel: 'Salle',
       hint: 'Appels serveur et additions',
       icon: LayoutGrid,

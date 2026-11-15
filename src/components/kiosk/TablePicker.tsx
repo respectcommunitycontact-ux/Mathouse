@@ -22,9 +22,15 @@ const STATUS: Record<TableStatus, { label: string; dot: string; ring: string }> 
 export const TablePicker: React.FC = () => {
   const { config, startTableSession } = useTabletStore();
   const [tables, setTables] = useState<TableRecord[]>([]);
+  const [hasHistory, setHasHistory] = useState(false);
 
   useEffect(() => {
     DataService.initData();
+    try {
+      setHasHistory(Boolean(localStorage.getItem('tableNumber')));
+    } catch {
+      /* ignore */
+    }
     const load = () => DataService.getTables().then((t) => setTables([...t].sort((a, b) => a.number - b.number)));
     load();
     const unsubscribe = DataService.subscribe((event) => {
@@ -83,7 +89,7 @@ export const TablePicker: React.FC = () => {
           <div className="mt-6 grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
             {tables.map((t) => {
               const s = STATUS[t.status];
-              const isLast = t.number === config.tableNumber;
+              const isLast = hasHistory && t.number === config.tableNumber;
               return (
                 <button
                   key={t.id}

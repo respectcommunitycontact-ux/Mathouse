@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { TableRecord, TableStatus } from '@/types';
 import { DataService } from '@/lib/data-service';
-import { Battery, BatteryLow, Wifi, WifiOff, Zap, Check, RotateCcw, LayoutGrid } from 'lucide-react';
+import { Check, RotateCcw, LayoutGrid } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
 import {
   Card,
@@ -46,8 +46,6 @@ export default function TablesManagementPage() {
     await loadTables();
   };
 
-  const onlineCount = tables.filter((t) => t.is_online).length;
-  const lowBattery = tables.filter((t) => t.battery_level < 20 && !t.is_charging).length;
   const count = (s: TableStatus) => tables.filter((t) => t.status === s).length;
   const attention = count('serveur_appele') + count('addition_demandee');
 
@@ -73,16 +71,9 @@ export default function TablesManagementPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Salle & tablettes"
-        description="Chaque carte correspond à une table et à sa tablette. Traitez les appels serveur et les additions, puis libérez la table quand les clients sont partis."
-        meta={
-          <>
-            <CountPill tone="success">
-              {onlineCount}/{tables.length} tablettes connectées
-            </CountPill>
-            {lowBattery > 0 && <CountPill tone="danger">{lowBattery} batterie faible</CountPill>}
-          </>
-        }
+        title="Salle"
+        description="Chaque carte correspond à une table. Traitez les appels serveur et les additions, puis libérez la table quand les clients sont partis."
+        meta={<CountPill>{tables.length - count('libre')} occupée(s) sur {tables.length}</CountPill>}
       />
 
       <div className="flex flex-col gap-3 mb-5">
@@ -114,29 +105,12 @@ export default function TablesManagementPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
           {sortedTables.map((tbl) => {
             const s = TABLE_STATUS[tbl.status];
-            const batteryLow = tbl.battery_level < 20 && !tbl.is_charging;
             return (
               <Card key={tbl.id} className={`p-4 flex flex-col gap-3 ${s.card}`}>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-lg font-bold text-slate-900 leading-tight">Table {tbl.number}</p>
-                    <div className="mt-1.5">
-                      <StatusBadge status={tbl.status} />
-                    </div>
-                  </div>
-                  <div className="text-right text-xs text-slate-500 space-y-1">
-                    <p
-                      className={`flex items-center justify-end gap-1 ${batteryLow ? 'text-rose-600 font-semibold' : ''}`}
-                      title={tbl.is_charging ? 'Tablette en charge' : 'Batterie de la tablette'}
-                    >
-                      {batteryLow ? <BatteryLow className="w-3.5 h-3.5" /> : <Battery className="w-3.5 h-3.5" />}
-                      {tbl.battery_level} %
-                      {tbl.is_charging && <Zap className="w-3 h-3 text-amber-500" />}
-                    </p>
-                    <p className={`flex items-center justify-end gap-1 ${tbl.is_online ? '' : 'text-rose-600 font-semibold'}`}>
-                      {tbl.is_online ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
-                      {tbl.is_online ? 'En ligne' : 'Hors ligne'}
-                    </p>
+                <div>
+                  <p className="text-lg font-bold text-slate-900 leading-tight">Table {tbl.number}</p>
+                  <div className="mt-1.5">
+                    <StatusBadge status={tbl.status} />
                   </div>
                 </div>
 
