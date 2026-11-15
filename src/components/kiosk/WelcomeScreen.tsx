@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useTabletStore } from '@/store/tabletStore';
 import { User, Users, Bell, Sparkles, UtensilsCrossed, ArrowRight } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
+import { enterFullscreen } from '@/lib/pwa';
 
 export const WelcomeScreen: React.FC = () => {
   const { config, setPeopleCount, setActiveScreen, callWaiter } = useTabletStore();
@@ -12,12 +13,14 @@ export const WelcomeScreen: React.FC = () => {
 
   const handleSolo = () => {
     playTapSound();
+    enterFullscreen();
     setPeopleCount(1);
     setActiveScreen('menu');
   };
 
   const handleGroup = () => {
     playTapSound();
+    enterFullscreen();
     setActiveScreen('people-picker');
   };
 

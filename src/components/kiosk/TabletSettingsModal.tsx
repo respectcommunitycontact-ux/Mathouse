@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { playTapSound } from '@/lib/sound';
+import { enterFullscreen, exitFullscreen, isFullscreen as isFs } from '@/lib/pwa';
+import { InstallAppButton } from '@/components/InstallAppButton';
 
 interface TabletSettingsModalProps {
   isOpen: boolean;
@@ -43,7 +45,7 @@ export const TabletSettingsModal: React.FC<TabletSettingsModalProps> = ({ isOpen
         });
       }
 
-      setIsFullscreen(Boolean(document.fullscreenElement));
+      setIsFullscreen(isFs());
     }
   }, [isOpen]);
 
@@ -66,13 +68,11 @@ export const TabletSettingsModal: React.FC<TabletSettingsModalProps> = ({ isOpen
 
   const toggleFullscreen = () => {
     playTapSound();
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch((err) => {
-        console.warn('Fullscreen error:', err);
-      });
+    if (!isFs()) {
+      enterFullscreen();
       setIsFullscreen(true);
     } else {
-      document.exitFullscreen().catch(() => {});
+      exitFullscreen();
       setIsFullscreen(false);
     }
   };
@@ -185,7 +185,8 @@ export const TabletSettingsModal: React.FC<TabletSettingsModalProps> = ({ isOpen
           </div>
 
           {/* SECTION 3: Kiosk Utilities & Diagnostics */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            <InstallAppButton variant="kiosk" />
             <button
               onClick={toggleFullscreen}
               className="p-3 rounded-2xl bg-[#1A2230]/60 hover:bg-[#1A2230] border border-white/10 flex flex-col items-center justify-center text-center transition"

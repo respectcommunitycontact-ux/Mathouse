@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { playOrderChime, playTapSound } from '@/lib/sound';
 import { DataService } from '@/lib/data-service';
+import { InstallAppButton } from '@/components/InstallAppButton';
 
 export const AdminNavbar: React.FC = () => {
   const pathname = usePathname();
@@ -160,6 +161,7 @@ export const AdminNavbar: React.FC = () => {
             <Volume2 className="w-[18px] h-[18px]" />
             <span>Tester le son</span>
           </button>
+          <InstallAppButton variant="sidebar" />
         </div>
       </aside>
 
