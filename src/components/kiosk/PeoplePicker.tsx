@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useTabletStore } from '@/store/tabletStore';
 import { Users, ArrowLeft, ArrowRight, Minus, Plus } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
+import { enterFullscreen } from '@/lib/pwa';
 
 export const PeoplePicker: React.FC = () => {
   const { setPeopleCount, setActiveScreen } = useTabletStore();
@@ -30,6 +31,7 @@ export const PeoplePicker: React.FC = () => {
 
   const handleConfirm = () => {
     playTapSound();
+    enterFullscreen();
     setPeopleCount(count);
     setActiveScreen('menu');
   };
