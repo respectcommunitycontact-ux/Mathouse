@@ -13,7 +13,11 @@ import {
   Users,
   Plus,
   Check,
-  RotateCcw
+  RotateCcw,
+  Flame,
+  Leaf,
+  Sparkles,
+  ChevronRight,
 } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
 
@@ -27,93 +31,59 @@ const CATEGORIES: ('Toutes' | MenuCategory)[] = [
   'Vins',
 ];
 
-// Authentic Chalkboard Brush Banner matching Image 1
-const CategoryBrushBanner: React.FC<{ title: string }> = ({ title }) => {
-  return (
-    <div className="relative inline-flex items-center justify-center my-2 select-none">
-      <svg
-        viewBox="0 0 240 38"
-        className="w-44 sm:w-52 h-8 sm:h-9 filter drop-shadow-[0_2px_6px_rgba(217,119,6,0.3)]"
-        preserveAspectRatio="none"
-      >
-        <defs>
-          <linearGradient id={`brushGrad-${title}`} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#D97706" />
-            <stop offset="15%" stopColor="#F59E0B" />
-            <stop offset="50%" stopColor="#FBBF24" />
-            <stop offset="85%" stopColor="#F59E0B" />
-            <stop offset="100%" stopColor="#D97706" />
-          </linearGradient>
-        </defs>
-        {/* Organic brush stroke with bristle fringe */}
-        <path
-          d="M 12 10 
-             C 4 12, 1 15, 0 19 
-             C 2 23, 6 26, 12 28 
-             C 22 30, 45 31, 80 32 
-             C 130 33, 175 32, 205 30 
-             C 224 29, 235 25, 240 20 
-             C 238 15, 230 11, 218 9 
-             C 185 6, 130 5, 80 6 
-             C 45 7, 24 8, 12 10 Z"
-          fill={`url(#brushGrad-${title})`}
-        />
-        {/* Subtle bristle highlights */}
-        <path
-          d="M 8 16 L 2 19 L 7 22 M 232 15 L 238 19 L 233 23 M 20 10 C 70 7, 160 6, 215 9"
-          stroke="#FEF08A"
-          strokeWidth="1.2"
-          fill="none"
-          opacity="0.4"
-        />
-      </svg>
-      {/* Centered White Bold Condensed Text */}
-      <span className="absolute inset-0 flex items-center justify-center font-black tracking-widest text-[11px] sm:text-xs text-white uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-        {title}
-      </span>
-    </div>
-  );
+// Category metadata for Dribelot-style editorial presentation
+const CATEGORY_META: Record<
+  string,
+  {
+    subtitle: string;
+    scriptTag: string;
+    headerImage: string;
+    footerImage: string;
+  }
+> = {
+  Toutes: {
+    subtitle: 'Carte Gastronomique & Créations Gourmandes',
+    scriptTag: 'Cuisine d’Émotion & Terroir',
+    headerImage: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+    footerImage: 'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=400&q=80',
+  },
+  Entrées: {
+    subtitle: 'Pour Débuter la Dégustation',
+    scriptTag: 'Fraîcheur & Finesse',
+    headerImage: 'https://images.unsplash.com/photo-1608897013039-887f21d8c804?auto=format&fit=crop&w=600&q=80',
+    footerImage: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80',
+  },
+  Plats: {
+    subtitle: 'Pièces Nobles & Cuissons Maîtrisées',
+    scriptTag: 'Viandes & Poissons d’Exception',
+    headerImage: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+    footerImage: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=400&q=80',
+  },
+  Spécialités: {
+    subtitle: 'La Signature Unique de Notre Chef',
+    scriptTag: 'Incontournables de la Maison',
+    headerImage: 'https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=600&q=80',
+    footerImage: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=400&q=80',
+  },
+  Desserts: {
+    subtitle: 'Douceurs Sucrées & Pâtisseries Fines',
+    scriptTag: 'Gourmandise & Délicatesse',
+    headerImage: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80',
+    footerImage: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80',
+  },
+  Boissons: {
+    subtitle: 'Mocktails, Nectars & Rafraîchissements',
+    scriptTag: 'Élixirs & Infusions Fraîches',
+    headerImage: 'https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&w=600&q=80',
+    footerImage: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=400&q=80',
+  },
+  Vins: {
+    subtitle: 'Sélection de Grands Crus & Domaines',
+    scriptTag: 'Cave du Sommelier',
+    headerImage: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=600&q=80',
+    footerImage: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=400&q=80',
+  },
 };
-
-// Subtle Chalkboard Botanical & Culinary Watermarks (matching Image 1)
-const ChalkWatermarks: React.FC = () => (
-  <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
-    {/* Top-Left Botanical Herb / Rosemary sprig */}
-    <svg className="absolute -top-6 -left-6 w-52 h-52 text-white/[0.045] fill-none stroke-current stroke-1" viewBox="0 0 100 100">
-      <path d="M10 85 Q 35 50, 75 15" />
-      <path d="M 25 65 Q 35 50, 20 42 Q 30 58, 25 65" fill="currentColor" fillOpacity="0.03" />
-      <path d="M 40 50 Q 58 38, 48 26 Q 46 45, 40 50" fill="currentColor" fillOpacity="0.03" />
-      <path d="M 58 34 Q 74 24, 68 14 Q 62 30, 58 34" fill="currentColor" fillOpacity="0.03" />
-      <circle cx="28" cy="45" r="2.5" />
-      <circle cx="52" cy="30" r="2" />
-    </svg>
-
-    {/* Top-Right Chili / Culinary spice doodle */}
-    <svg className="absolute -top-4 -right-4 w-48 h-48 text-white/[0.04] fill-none stroke-current stroke-1" viewBox="0 0 100 100">
-      <path d="M85 15 C65 25, 42 55, 58 82 C68 66, 78 40, 85 15 Z" fill="currentColor" fillOpacity="0.02" />
-      <path d="M85 15 Q 92 10, 96 14" />
-      <path d="M28 20 Q 38 30, 28 40 Q 18 30, 28 20 Z" fill="currentColor" fillOpacity="0.02" />
-    </svg>
-
-    {/* Bottom-Left Cooking Utensil / Fork & Knife */}
-    <svg className="absolute -bottom-8 -left-6 w-56 h-56 text-white/[0.04] fill-none stroke-current stroke-1" viewBox="0 0 100 100">
-      <path d="M20 95 L 48 40" />
-      <path d="M 42 42 L 52 28 L 47 50" />
-      <path d="M 35 95 L 62 40" />
-      <path d="M 58 42 Q 70 25, 64 48" />
-      <circle cx="48" cy="30" r="3" />
-    </svg>
-
-    {/* Subtle Chalk Dust Grain Pattern */}
-    <div
-      className="absolute inset-0 opacity-[0.025]"
-      style={{
-        backgroundImage: `radial-gradient(circle, #ffffff 1px, transparent 1px)`,
-        backgroundSize: '28px 28px',
-      }}
-    />
-  </div>
-);
 
 export const MenuCatalog: React.FC = () => {
   const { config, peopleCount, callWaiter, selectedGuestForAdd } = useTabletStore();
@@ -157,10 +127,10 @@ export const MenuCatalog: React.FC = () => {
     playTapSound();
     addItem(dish, 1, selectedGuestForAdd || 'Personne 1');
     setQuickAddedId(dish.id);
-    setTimeout(() => setQuickAddedId(null), 800);
+    setTimeout(() => setQuickAddedId(null), 900);
   };
 
-  // Filter items by category & search (no dietary filters)
+  // Filter items by category & search
   const filteredItems = menuItems.filter((item) => {
     const matchesCategory = selectedCategory === 'Toutes' || item.category === selectedCategory;
     const matchesSearch =
@@ -170,131 +140,210 @@ export const MenuCatalog: React.FC = () => {
     return matchesCategory && matchesSearch;
   });
 
-  // Identify chef special dish for showcase in bottom right (similar to "THE FOOD RESTO" in Image 1)
+  // Group helpers
+  const itemsByCategory = (cat: MenuCategory) => filteredItems.filter((item) => item.category === cat);
+
   const chefSpecial =
-    menuItems.find(item => item.tags?.includes('Signature') && item.is_available) ||
-    menuItems.find(item => item.category === 'Plats') ||
+    menuItems.find((item) => item.tags?.includes('Signature') && item.is_available) ||
+    menuItems.find((item) => item.category === 'Plats') ||
     menuItems[0];
 
-  // Helper to render an item row in the chalkboard list
-  const renderDishRow = (dish: MenuItem) => {
+  // Helper to determine dietary tags
+  const getDietaryFlags = (dish: MenuItem) => {
+    const isVegetarian =
+      dish.tags?.some((t) => /végé/i.test(t)) ||
+      dish.name.toLowerCase().includes('veggie') ||
+      dish.name.toLowerCase().includes('burrata');
+    const isSpicy =
+      dish.tags?.some((t) => /épic|piment|spicy/i.test(t)) ||
+      dish.description.toLowerCase().includes('piment');
+    const isChefSpecial = dish.tags?.some((t) =>
+      /signature|chef|coup de cœur|incontournable/i.test(t)
+    );
+    return { isVegetarian, isSpicy, isChefSpecial };
+  };
+
+  // Render an individual dish item row in authentic Dribelot style
+  const renderDribelotDishRow = (dish: MenuItem) => {
     const isQuickAdded = quickAddedId === dish.id;
+    const { isVegetarian, isSpicy, isChefSpecial } = getDietaryFlags(dish);
 
     return (
       <div
         key={dish.id}
         onClick={() => handleOpenDish(dish)}
-        className="group relative flex flex-col py-2 px-2.5 sm:px-3 rounded-xl hover:bg-white/[0.05] active:bg-white/[0.08] transition-all duration-150 cursor-pointer select-none border border-transparent hover:border-white/5"
+        className="group relative cursor-pointer p-2 sm:p-2.5 rounded-xl hover:bg-orange-500/[0.06] active:bg-orange-500/[0.1] transition-all duration-200 flex flex-col justify-between border border-transparent hover:border-[#E85D04]/20"
       >
-        {/* Top line: Name + Dotted Leader + Price + Quick Add */}
-        <div className="flex items-baseline justify-between gap-2">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <h4 className="font-bold text-xs sm:text-sm text-white tracking-wide uppercase group-hover:text-amber-300 transition-colors">
-              {dish.name}
-            </h4>
-            {dish.tags?.includes('Signature') && (
-              <span className="shrink-0 text-amber-400 text-xs" title="Signature du Chef">
-                ★
+        <div>
+          {/* Title + Badges + Dotted Leader + Price + Quick Add */}
+          <div className="flex items-baseline justify-between gap-1 sm:gap-2">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <h4 className="text-xs sm:text-[13.5px] font-bold text-[#2B2D42] truncate group-hover:text-[#E85D04] transition-colors font-sans">
+                {dish.name}
+              </h4>
+              {isVegetarian && (
+                <span title="Végétarien">
+                  <Leaf className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-600 flex-shrink-0" />
+                </span>
+              )}
+              {isSpicy && (
+                <span title="Épicé">
+                  <Flame className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-500 flex-shrink-0" />
+                </span>
+              )}
+              {isChefSpecial && (
+                <span title="Coup de cœur Chef">
+                  <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-500 flex-shrink-0" />
+                </span>
+              )}
+              {!dish.is_available && (
+                <span className="shrink-0 px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 text-[9px] font-bold uppercase tracking-wider">
+                  Épuisé
+                </span>
+              )}
+            </div>
+
+            {/* Dotted Leader Line */}
+            <div className="flex-1 border-b border-dotted border-[#D5CEC2] mx-1 sm:mx-2 hidden sm:block self-center min-w-[14px]" />
+
+            {/* Price and Quick Add */}
+            <div className="flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
+              <span className="text-xs sm:text-[14px] font-extrabold text-[#E85D04] font-serif shrink-0">
+                {dish.price.toFixed(2)} €
               </span>
-            )}
-            {!dish.is_available && (
-              <span className="shrink-0 px-1.5 py-0.5 rounded bg-rose-600/30 text-rose-300 text-[9px] font-bold uppercase tracking-wider">
-                Épuisé
-              </span>
-            )}
+              <button
+                type="button"
+                disabled={!dish.is_available}
+                onClick={(e) => handleQuickAdd(e, dish)}
+                className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm ${
+                  isQuickAdded
+                    ? 'bg-emerald-600 text-white scale-110 shadow-emerald-600/30'
+                    : 'bg-[#FFFDF9] text-[#E85D04] hover:bg-[#E85D04] hover:text-white border border-[#E8E1D5] active:scale-90 shadow-sm'
+                }`}
+                title="Ajouter au panier"
+              >
+                {isQuickAdded ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+              </button>
+            </div>
           </div>
 
-          {/* Dotted leader between name and price */}
-          <div className="flex-1 border-b border-dotted border-white/20 mx-2 hidden sm:block self-center min-w-[20px]" />
-
-          <div className="flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
-            <span className="font-bold text-xs sm:text-sm text-white font-mono group-hover:text-amber-300 transition-colors">
-              {dish.price.toFixed(2)} €
-            </span>
-            <button
-              type="button"
-              disabled={!dish.is_available}
-              onClick={(e) => handleQuickAdd(e, dish)}
-              className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm ${
-                isQuickAdded
-                  ? 'bg-emerald-500 text-white scale-110 shadow-emerald-500/30'
-                  : 'bg-white/10 hover:bg-amber-400 hover:text-black text-slate-200 active:scale-90 border border-white/10'
-              }`}
-              title="Ajouter au panier"
-            >
-              {isQuickAdded ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-            </button>
-          </div>
+          {/* Description */}
+          <p className="text-[11px] sm:text-[12px] text-[#555870] leading-snug mt-1 pr-6 line-clamp-2">
+            {dish.description}
+          </p>
         </div>
 
-        {/* Bottom line: Description */}
-        <p className="text-[11px] sm:text-xs text-slate-400 font-light leading-snug mt-0.5 pr-6 line-clamp-2">
-          {dish.description}
-        </p>
+        {/* Tap to view hint on hover */}
+        <div className="flex items-center gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-[#E85D04] font-medium">
+          <ChevronRight className="w-3 h-3" />
+          <span>Voir détails, ingrédients & options</span>
+        </div>
       </div>
     );
   };
 
-  // Helper to render a category section
-  const renderCategorySection = (categoryTitle: string, items: MenuItem[]) => {
-    if (items.length === 0) return null;
+  // Section Header inside the parchment paper
+  const renderCategoryHeader = (categoryName: string, isCoverSpread = false) => {
+    const meta = CATEGORY_META[categoryName] || CATEGORY_META['Toutes'];
 
     return (
-      <div key={categoryTitle} className="mb-4 sm:mb-6">
-        <div className="flex justify-center sm:justify-start mb-1.5">
-          <CategoryBrushBanner title={categoryTitle} />
+      <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-[#E8E1D5] mb-4 select-none">
+        <div className="flex items-center gap-3">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-[#E85D04]/40 shadow-md ring-4 ring-[#E85D04]/10 shrink-0">
+            <img
+              src={meta.headerImage}
+              alt={categoryName}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div>
+            <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[#E85D04] font-extrabold block">
+              {isCoverSpread ? 'Le Menu Gastronomique' : 'Catégorie'}
+            </span>
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#2B2D42] font-serif leading-tight">
+              {categoryName === 'Toutes' ? 'Notre Carte' : categoryName}
+            </h2>
+            <p className="text-xs sm:text-sm text-[#E85D04] font-script -mt-0.5">
+              {meta.scriptTag}
+            </p>
+          </div>
         </div>
-        <div className="space-y-0.5 sm:space-y-1">
-          {items.map(renderDishRow)}
+
+        <div className="text-right hidden xs:block">
+          <span className="text-xl sm:text-2xl font-black tracking-tight text-[#E85D04] font-serif block">
+            MAT HOUSE
+          </span>
+          <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-[#6B4226]/80 font-bold -mt-0.5">
+            Cuisine Fait Maison
+          </p>
         </div>
       </div>
     );
   };
 
-  // Group items by category for layout
-  const itemsByCategory = (cat: MenuCategory) => filteredItems.filter(item => item.category === cat);
+  // Bottom Footer inside the parchment paper
+  const renderPageFooter = (pageStr: string, imageSrc?: string) => {
+    return (
+      <div className="relative z-10 pt-3 border-t border-[#E8E1D5] flex items-center justify-between mt-4 select-none">
+        <div className="flex items-center gap-2">
+          {imageSrc && (
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border border-[#E85D04]/30 shadow-sm shrink-0">
+              <img src={imageSrc} alt="Terroir" className="w-full h-full object-cover" />
+            </div>
+          )}
+          <span className="text-[11px] text-[#6B4226]/85 font-serif italic">
+            Ingrédients Frais & Produits du Terroir
+          </span>
+        </div>
+
+        <div className="text-right">
+          <span className="text-[11px] font-semibold text-[#8C8275]">
+            {pageStr} &bull; MAT HOUSE
+          </span>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="relative w-full h-full flex flex-col select-none overflow-hidden pb-24 text-slate-100">
-      {/* 1. ATMOSPHERIC RESTAURANT BACKGROUND (BEHIND EVERYTHING) */}
+      {/* 1. ATMOSPHERIC LUXURY RESTAURANT BACKGROUND (BEHIND THE PAPER MENU) */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
         <div
-          className="absolute inset-0 bg-cover bg-center filter brightness-[0.32] contrast-[1.12] scale-105"
+          className="absolute inset-0 bg-cover bg-center filter brightness-[0.22] contrast-[1.15] scale-105"
           style={{
             backgroundImage: `url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=2000&q=80')`,
           }}
         />
-        {/* Layered dark gradients for readability & luxury ambiance */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#07090E] via-[#0B0E14]/85 to-[#0B0E14]/92" />
-        <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#0B0E14]/50 to-[#0B0E14]/95" />
-        {/* Warm golden light bloom */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[450px] bg-amber-500/[0.04] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C11] via-[#121318]/90 to-[#121318]/95" />
+        {/* Warm amber light bloom resembling restaurant lamp over the table */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[850px] h-[550px] bg-amber-500/[0.05] rounded-full blur-3xl pointer-events-none" />
       </div>
 
       {/* Top Tablet Header Bar */}
-      <header className="glass-panel sticky top-0 px-4 sm:px-8 py-2.5 flex items-center justify-between gap-3 z-30 border-b border-[#D4AF37]/20 shadow-2xl backdrop-blur-xl">
+      <header className="glass-panel sticky top-0 px-4 sm:px-8 py-2.5 flex items-center justify-between gap-3 z-30 border-b border-[#E85D04]/25 shadow-2xl backdrop-blur-xl">
         <div className="flex items-center space-x-3 sm:space-x-5 shrink-0">
           <div className="relative h-9 sm:h-11 w-32 sm:w-40 shrink-0">
             <Image
               src="/logo.png"
               alt="Mat House Restaurant"
               fill
-              className="object-contain object-left filter drop-shadow-[0_2px_12px_rgba(212,175,55,0.5)]"
+              className="object-contain object-left filter drop-shadow-[0_2px_12px_rgba(232,93,4,0.4)]"
               priority
             />
           </div>
 
-          <div className="px-3 py-1 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#E5C158] font-extrabold text-xs tracking-wider shrink-0 shadow-gold-subtle">
+          <div className="px-3 py-1 rounded-full bg-[#E85D04]/15 border border-[#E85D04]/40 text-[#FAA307] font-extrabold text-xs tracking-wider shrink-0 shadow-sm">
             TABLE {config.tableNumber}
           </div>
 
           <div className="hidden md:flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold">
-            <Users className="w-3.5 h-3.5 text-[#D4AF37]" />
+            <Users className="w-3.5 h-3.5 text-[#FAA307]" />
             <span>{peopleCount} {peopleCount === 1 ? 'convive' : 'convives'}</span>
           </div>
 
           {selectedGuestForAdd && (
-            <div className="hidden lg:flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold">
+            <div className="hidden lg:flex items-center space-x-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-300 text-xs font-bold">
               <span>Ajout pour : {selectedGuestForAdd}</span>
             </div>
           )}
@@ -302,13 +351,13 @@ export const MenuCatalog: React.FC = () => {
 
         {/* Search Bar */}
         <div className="relative flex-1 max-w-xs sm:max-w-md mx-2">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#D4AF37]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FAA307]" />
           <input
             type="text"
             placeholder="Rechercher un mets, ingrédient..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-1.5 text-xs sm:text-sm rounded-full bg-[#121824]/90 border border-white/10 text-white placeholder-slate-400 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]/50 transition-all duration-300 shadow-inner"
+            className="w-full pl-10 pr-4 py-1.5 text-xs sm:text-sm rounded-full bg-[#121824]/90 border border-white/10 text-white placeholder-slate-400 focus:outline-none focus:border-[#E85D04] focus:ring-1 focus:ring-[#E85D04]/50 transition-all duration-300 shadow-inner"
           />
         </div>
 
@@ -318,17 +367,17 @@ export const MenuCatalog: React.FC = () => {
           className={`px-3.5 sm:px-4 py-1.5 rounded-full border text-xs font-bold transition-all duration-300 flex items-center gap-2 shrink-0 ${
             waiterCalled
               ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 animate-pulse shadow-emerald-500/20'
-              : 'bg-[#121824]/80 text-slate-200 border-white/10 hover:border-[#D4AF37]/40 active:scale-95'
+              : 'bg-[#121824]/80 text-slate-200 border-white/10 hover:border-[#E85D04]/40 active:scale-95'
           }`}
           title="Appeler un serveur à votre table"
         >
-          <Bell className={`w-4 h-4 ${waiterCalled ? 'text-emerald-400 rotate-12' : 'text-[#D4AF37]'}`} />
+          <Bell className={`w-4 h-4 ${waiterCalled ? 'text-emerald-400 rotate-12' : 'text-[#FAA307]'}`} />
           <span className="hidden md:inline">{waiterCalled ? 'Serveur prévenu' : 'Serveur'}</span>
         </button>
       </header>
 
-      {/* Slim Category Navigation Pills */}
-      <div className="px-4 sm:px-8 py-2 flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-white/5 bg-[#0e131d]/75 backdrop-blur-md z-20">
+      {/* Dribelot-Style Category Navigation Pills */}
+      <div className="px-4 sm:px-8 py-2.5 flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-white/5 bg-[#0e131d]/85 backdrop-blur-md z-20">
         {CATEGORIES.map((cat) => {
           const isSelected = selectedCategory === cat;
           return (
@@ -338,10 +387,10 @@ export const MenuCatalog: React.FC = () => {
                 playTapSound();
                 setSelectedCategory(cat);
               }}
-              className={`min-h-[34px] px-3.5 sm:px-5 py-1 rounded-full font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 border ${
+              className={`min-h-[36px] px-4 sm:px-5 py-1 rounded-full font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 border ${
                 isSelected
-                  ? 'bg-gradient-to-r from-[#D4AF37] to-[#E5C158] text-[#0B0E14] border-[#F5E6B3]/60 shadow-gold-subtle font-extrabold'
-                  : 'bg-[#121824]/90 text-slate-300 border-white/[0.08] hover:border-[#D4AF37]/30 hover:text-white'
+                  ? 'bg-gradient-to-r from-[#E85D04] via-[#F48C06] to-[#E85D04] text-white border-transparent shadow-[0_4px_16px_rgba(232,93,4,0.4)] scale-105'
+                  : 'bg-[#1A1D27]/90 text-[#E8E1D5] border-white/10 hover:border-[#E85D04]/40 hover:text-white'
               }`}
             >
               {cat}
@@ -356,7 +405,7 @@ export const MenuCatalog: React.FC = () => {
               setSearchQuery('');
               setSelectedCategory('Toutes');
             }}
-            className="flex items-center gap-1 text-xs text-[#D4AF37] hover:underline ml-auto font-bold whitespace-nowrap shrink-0 pl-2"
+            className="flex items-center gap-1 text-xs text-[#FAA307] hover:underline ml-auto font-bold whitespace-nowrap shrink-0 pl-2"
           >
             <RotateCcw className="w-3 h-3" />
             <span>Voir tout le menu</span>
@@ -364,135 +413,233 @@ export const MenuCatalog: React.FC = () => {
         )}
       </div>
 
-      {/* Main Chalkboard Scroll Area */}
+      {/* MAIN DRIBELOT WARM PAPER SPREAD SCROLL AREA */}
       <div className="flex-1 overflow-y-auto no-scrollbar px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-36 sm:pb-40">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {filteredItems.length === 0 ? (
-            <div className="text-center py-20 bg-[#121824]/80 backdrop-blur-md rounded-3xl border border-white/5 max-w-lg mx-auto">
-              <p className="text-base text-slate-400 mb-3">Aucun mets ne correspond à vos critères.</p>
+            <div className="text-center py-20 bg-[#F9F6F0] paper-texture rounded-3xl border border-[#E8E1D5] max-w-lg mx-auto shadow-xl">
+              <p className="text-base font-serif font-bold text-[#2B2D42] mb-3">
+                Aucun met ne correspond à votre recherche.
+              </p>
               <button
                 onClick={() => {
                   setSelectedCategory('Toutes');
                   setSearchQuery('');
                 }}
-                className="text-[#D4AF37] underline text-sm font-bold hover:text-[#E5C158]"
+                className="text-[#E85D04] underline text-sm font-bold hover:text-[#DC2F02]"
               >
                 Réinitialiser la recherche
               </button>
             </div>
           ) : selectedCategory !== 'Toutes' ? (
-            /* Single Category Focused View */
-            <div className="relative bg-[#0F131A]/95 backdrop-blur-xl rounded-3xl border border-[#D4AF37]/25 p-5 sm:p-8 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] overflow-hidden">
-              <ChalkWatermarks />
+            /* ============================================================ */
+            /* SINGLE CATEGORY EDITORIAL SPREAD (DRIBELOT STYLE)            */
+            /* ============================================================ */
+            <div className="relative bg-[#F9F6F0] paper-texture rounded-3xl border border-[#E8E1D5] p-5 sm:p-8 paper-card-shadow overflow-hidden">
+              {/* Warm decorative gradient flares */}
+              <div className="absolute top-0 right-0 w-48 h-48 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+
               <div className="relative z-10">
-                <div className="flex justify-center mb-6">
-                  <CategoryBrushBanner title={selectedCategory} />
+                {renderCategoryHeader(selectedCategory)}
+
+                {/* 2-Columns Dishes Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 sm:gap-x-8 gap-y-3 sm:gap-y-4 my-2">
+                  {filteredItems.map(renderDribelotDishRow)}
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
-                  {filteredItems.map(renderDishRow)}
-                </div>
+
+                {renderPageFooter(
+                  selectedCategory,
+                  CATEGORY_META[selectedCategory]?.footerImage || CATEGORY_META['Toutes'].footerImage
+                )}
               </div>
             </div>
           ) : (
-            /* Full Chalkboard Menu Board Layout (Matching Image 1) */
-            <div className="relative bg-[#0F131A]/95 backdrop-blur-xl rounded-3xl border border-[#D4AF37]/30 p-5 sm:p-8 lg:p-10 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)] overflow-hidden">
-              {/* Subtle Chalkboard Watermarks and Grain */}
-              <ChalkWatermarks />
+            /* ============================================================ */
+            /* FULL 2-PAGE MAGAZINE SPREAD (DRIBELOT DUAL-PAGE BOOK STYLE) */
+            /* ============================================================ */
+            <div className="relative bg-[#F9F6F0] paper-texture rounded-3xl border border-[#E8E1D5] paper-card-shadow overflow-hidden">
+              {/* Decorative warm ambient tints */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
 
-              <div className="relative z-10">
-                {/* Harmonious Slate Header across both columns */}
-                <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b border-white/10 pb-4 mb-6 sm:mb-8 gap-2">
-                  <div>
-                    <span className="text-xs font-black tracking-[0.25em] text-amber-400 uppercase block mb-0.5">
-                      MAT HOUSE RESTAURANT
-                    </span>
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white uppercase font-sans">
-                      LE MENU
-                    </h1>
+              {/* Editorial Header across full spread */}
+              <div className="p-5 sm:p-8 pb-4 border-b border-[#E8E1D5]">
+                {renderCategoryHeader('Toutes', true)}
+              </div>
+
+              {/* Open Magazine Spread: Left Page & Right Page with 3D Center Spine */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 relative">
+                {/* --- PAGE GAUCHE (LEFT SPREAD) --- */}
+                <div className="p-5 sm:p-8 lg:pr-10 relative flex flex-col justify-between spine-shadow-left">
+                  <div className="space-y-6">
+                    {/* ENTRÉES SECTION */}
+                    {itemsByCategory('Entrées').length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between pb-2 border-b border-[#E8E1D5]/80 mb-3">
+                          <h3 className="text-lg sm:text-xl font-bold font-serif text-[#2B2D42] flex items-center gap-2">
+                            <span>Entrées</span>
+                            <span className="text-xs font-script text-[#E85D04] font-normal">
+                              Pour débuter
+                            </span>
+                          </h3>
+                          <span className="text-[10px] uppercase tracking-wider text-[#8C8275] font-semibold">
+                            Appetizers
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
+                          {itemsByCategory('Entrées').map(renderDribelotDishRow)}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* DESSERTS SECTION */}
+                    {itemsByCategory('Desserts').length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between pb-2 border-b border-[#E8E1D5]/80 mb-3">
+                          <h3 className="text-lg sm:text-xl font-bold font-serif text-[#2B2D42] flex items-center gap-2">
+                            <span>Desserts</span>
+                            <span className="text-xs font-script text-[#E85D04] font-normal">
+                              Douceurs sucrées
+                            </span>
+                          </h3>
+                          <span className="text-[10px] uppercase tracking-wider text-[#8C8275] font-semibold">
+                            Artisanal Sweets
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
+                          {itemsByCategory('Desserts').map(renderDribelotDishRow)}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* BOISSONS SECTION */}
+                    {itemsByCategory('Boissons').length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between pb-2 border-b border-[#E8E1D5]/80 mb-3">
+                          <h3 className="text-lg sm:text-xl font-bold font-serif text-[#2B2D42] flex items-center gap-2">
+                            <span>Boissons & Mocktails</span>
+                            <span className="text-xs font-script text-[#E85D04] font-normal">
+                              Fraîcheur
+                            </span>
+                          </h3>
+                          <span className="text-[10px] uppercase tracking-wider text-[#8C8275] font-semibold">
+                            Drinks
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
+                          {itemsByCategory('Boissons').map(renderDribelotDishRow)}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-xs text-slate-400 font-light max-w-xs sm:text-right">
-                    Mets d'exception préparés minute par notre brigade gastronomique
-                  </p>
+
+                  {renderPageFooter('Page 1', CATEGORY_META['Entrées'].footerImage)}
                 </div>
 
-                {/* Perfectly Aligned 2-Column Board */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-start">
-                  {/* --- COLUMN 1 (LEFT) --- */}
-                  <div className="flex flex-col">
-                    {/* Section: Entrées (APPETIZER) */}
-                    {renderCategorySection('Entrées', itemsByCategory('Entrées'))}
+                {/* 3D Center Spine Groove Divider for Large Screens */}
+                <div className="hidden lg:block absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-8 pointer-events-none z-10 bg-gradient-to-r from-black/[0.08] via-black/[0.18] to-black/[0.08]" />
 
-                    {itemsByCategory('Entrées').length > 0 && itemsByCategory('Desserts').length > 0 && (
-                      <div className="w-full h-px bg-white/15 my-3 sm:my-4" />
-                    )}
-
-                    {/* Section: Desserts (DESSERTS) */}
-                    {renderCategorySection('Desserts', itemsByCategory('Desserts'))}
-
-                    {itemsByCategory('Desserts').length > 0 && itemsByCategory('Boissons').length > 0 && (
-                      <div className="w-full h-px bg-white/15 my-3 sm:my-4" />
-                    )}
-
-                    {/* Section: Boissons (DRINKS) */}
-                    {renderCategorySection('Boissons', itemsByCategory('Boissons'))}
-                  </div>
-
-                  {/* --- COLUMN 2 (RIGHT) --- */}
-                  <div className="flex flex-col">
-                    {/* Section: Spécialités (SPECIAL MENU) */}
-                    {renderCategorySection('Spécialités', itemsByCategory('Spécialités'))}
-
-                    {itemsByCategory('Spécialités').length > 0 && itemsByCategory('Plats').length > 0 && (
-                      <div className="w-full h-px bg-white/15 my-3 sm:my-4" />
-                    )}
-
-                    {/* Section: Plats (MAIN DISHES) */}
-                    {renderCategorySection('Plats', itemsByCategory('Plats'))}
-
-                    {itemsByCategory('Plats').length > 0 && itemsByCategory('Vins').length > 0 && (
-                      <div className="w-full h-px bg-white/15 my-3 sm:my-4" />
-                    )}
-
-                    {/* Section: Vins */}
-                    {renderCategorySection('Vins', itemsByCategory('Vins'))}
-
-                    {/* Bottom Right Culinary Plate Showcase (THE FOOD RESTO in Image 1) */}
-                    {chefSpecial && (
-                      <div className="mt-6 pt-5 border-t border-white/15 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4">
-                        <div className="text-center sm:text-left flex-1">
-                          <span className="text-[10px] font-black tracking-widest text-amber-400 uppercase block">
-                            THE FOOD RESTO
-                          </span>
-                          <h3 className="text-sm sm:text-base font-serif font-bold text-white uppercase tracking-wider mt-0.5">
-                            SÉLECTION DU CHEF
+                {/* --- PAGE DROITE (RIGHT SPREAD) --- */}
+                <div className="p-5 sm:p-8 lg:pl-10 relative flex flex-col justify-between spine-shadow-right border-t lg:border-t-0 border-[#E8E1D5]">
+                  <div className="space-y-6">
+                    {/* SPÉCIALITÉS SECTION */}
+                    {itemsByCategory('Spécialités').length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between pb-2 border-b border-[#E8E1D5]/80 mb-3">
+                          <h3 className="text-lg sm:text-xl font-bold font-serif text-[#2B2D42] flex items-center gap-2">
+                            <span>Spécialités du Chef</span>
+                            <span className="text-xs font-script text-[#E85D04] font-normal">
+                              Créations
+                            </span>
                           </h3>
-                          <p className="text-[11px] text-slate-400 font-light max-w-xs mt-1">
-                            Création d'exception préparée minute avec des produits nobles du terroir.
+                          <span className="text-[10px] uppercase tracking-wider text-[#E85D04] font-bold bg-orange-100 px-2 py-0.5 rounded-full">
+                            Chef Specials
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
+                          {itemsByCategory('Spécialités').map(renderDribelotDishRow)}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* PLATS SECTION */}
+                    {itemsByCategory('Plats').length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between pb-2 border-b border-[#E8E1D5]/80 mb-3">
+                          <h3 className="text-lg sm:text-xl font-bold font-serif text-[#2B2D42] flex items-center gap-2">
+                            <span>Plats Principaux</span>
+                            <span className="text-xs font-script text-[#E85D04] font-normal">
+                              Viandes & Poissons
+                            </span>
+                          </h3>
+                          <span className="text-[10px] uppercase tracking-wider text-[#8C8275] font-semibold">
+                            Main Courses
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
+                          {itemsByCategory('Plats').map(renderDribelotDishRow)}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* VINS SECTION */}
+                    {itemsByCategory('Vins').length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between pb-2 border-b border-[#E8E1D5]/80 mb-3">
+                          <h3 className="text-lg sm:text-xl font-bold font-serif text-[#2B2D42] flex items-center gap-2">
+                            <span>Vins & Grands Crus</span>
+                            <span className="text-xs font-script text-[#E85D04] font-normal">
+                              Cave
+                            </span>
+                          </h3>
+                          <span className="text-[10px] uppercase tracking-wider text-[#8C8275] font-semibold">
+                            Wine Cellar
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
+                          {itemsByCategory('Vins').map(renderDribelotDishRow)}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Bottom Right Highlight: Chef Creation Showcase */}
+                    {chefSpecial && (
+                      <div className="mt-4 p-4 rounded-2xl bg-[#FFFDF9] border border-[#E8E1D5] shadow-sm flex items-center justify-between gap-4">
+                        <div className="flex-1">
+                          <span className="text-[10px] font-black tracking-widest text-[#E85D04] uppercase block">
+                            Coup de Cœur de la Maison
+                          </span>
+                          <h4 className="text-sm sm:text-base font-serif font-bold text-[#2B2D42] mt-0.5">
+                            {chefSpecial.name}
+                          </h4>
+                          <p className="text-[11px] text-[#555870] line-clamp-1 mt-0.5">
+                            {chefSpecial.description}
                           </p>
                           <button
                             onClick={() => handleOpenDish(chefSpecial)}
-                            className="mt-3 px-4 py-1.5 rounded-full bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-bold transition flex items-center gap-1.5 mx-auto sm:mx-0 active:scale-95"
+                            className="mt-2.5 px-3.5 py-1 rounded-full bg-[#E85D04] text-white hover:bg-[#DC2F02] text-xs font-bold transition flex items-center gap-1.5 shadow-sm active:scale-95"
                           >
-                            <span>Découvrir la création</span>
+                            <span>Découvrir</span>
                             <span>&bull; {chefSpecial.price.toFixed(2)} €</span>
                           </button>
                         </div>
 
                         <div
                           onClick={() => handleOpenDish(chefSpecial)}
-                          className="relative w-28 h-28 sm:w-32 sm:h-32 shrink-0 rounded-full overflow-hidden border-2 border-amber-400/40 shadow-xl cursor-pointer group"
+                          className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-full overflow-hidden border-2 border-[#E85D04]/40 shadow-md cursor-pointer group"
                         >
-                          <Image
+                          <img
                             src={chefSpecial.image_url}
                             alt={chefSpecial.name}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
                         </div>
                       </div>
                     )}
                   </div>
+
+                  {renderPageFooter('Page 2', CATEGORY_META['Plats'].footerImage)}
                 </div>
               </div>
             </div>
@@ -500,7 +647,7 @@ export const MenuCatalog: React.FC = () => {
         </div>
       </div>
 
-      {/* Dish Detail & Customization Modal */}
+      {/* Dish Detail & Customization Modal (Dribelot Parchment Style) */}
       <DishDetailModal
         dish={selectedDish}
         isOpen={isDishModalOpen}

@@ -9,6 +9,21 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        dribelot: {
+          beige: '#F9F6F0',
+          'beige-light': '#FDFAF5',
+          'beige-dark': '#EFE9DE',
+          cream: '#FFFDF9',
+          orange: '#E85D04',
+          'orange-light': '#F48C06',
+          'orange-glow': '#FAA307',
+          'orange-deep': '#DC2F02',
+          charcoal: '#2B2D42',
+          'charcoal-light': '#4A4E69',
+          'charcoal-dark': '#1A1B29',
+          border: '#E8E1D5',
+          parchment: '#F3EDE2',
+        },
         brand: {
           bg: "#0B1017",
           dark: "#0B1017",
@@ -37,12 +52,14 @@ const config: Config = {
       fontFamily: {
         serif: ["'Playfair Display'", "Georgia", "serif"],
         sans: [
+          "'Montserrat'",
           "'Plus Jakarta Sans'",
           "system-ui",
           "-apple-system",
           "BlinkMacSystemFont",
           "sans-serif"
         ],
+        script: ["'Caveat'", "cursive"],
       },
       animation: {
         "fade-in": "fadeIn 0.3s ease-out forwards",

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Montserrat:ital,wght@0,300..800;1,300..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,7 +8,12 @@
   --background: #0B0E14;
   --foreground: #F8FAFC;
   --font-serif: 'Playfair Display', Georgia, serif;
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Montserrat', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-script: 'Caveat', cursive;
+  --color-dribelot-beige: #F9F6F0;
+  --color-dribelot-orange: #E85D04;
+  --color-dribelot-accent: #F48C06;
+  --color-dribelot-charcoal: #2B2D42;
 }
 
 html,
@@ -30,6 +35,33 @@ body {
 
 .font-serif {
   font-family: var(--font-serif);
+}
+
+.font-script {
+  font-family: var(--font-script);
+}
+
+/* Dribelot Warm Paper Texture */
+.paper-texture {
+  background-color: #F9F6F0;
+  background-image: 
+    radial-gradient(rgba(200, 190, 175, 0.28) 1px, transparent 0),
+    radial-gradient(rgba(232, 93, 4, 0.03) 1px, transparent 0);
+  background-size: 24px 24px, 48px 48px;
+  background-position: 0 0, 12px 12px;
+}
+
+/* Dribelot Open Book Spine 3D Shadows */
+.spine-shadow-left {
+  box-shadow: inset -18px 0 24px -10px rgba(43, 45, 66, 0.25), inset -4px 0 8px rgba(0, 0, 0, 0.12);
+}
+
+.spine-shadow-right {
+  box-shadow: inset 18px 0 24px -10px rgba(43, 45, 66, 0.25), inset 4px 0 8px rgba(0, 0, 0, 0.12);
+}
+
+.paper-card-shadow {
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(232, 225, 213, 0.7);
 }
 
 /* Hairline border utility */
