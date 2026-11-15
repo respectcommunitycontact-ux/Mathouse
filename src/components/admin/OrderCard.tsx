@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Order, OrderStatus } from '@/types';
 import { Clock, CheckCheck, RotateCcw, AlertTriangle, MessageCircle, User, Users } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
-import { btn, formatEuro } from './ui';
+import { btn, formatMoney, formatTotals } from './ui';
 
 interface OrderCardProps {
   order: Order;
@@ -114,7 +114,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus }) =
                       )}
                     </div>
                   </div>
-                  <span className="text-xs text-slate-500 shrink-0 pt-1">{formatEuro(it.item_price * it.quantity)}</span>
+                  <span className="text-xs text-slate-500 shrink-0 pt-1">{formatMoney(it.item_price * it.quantity, it.currency)}</span>
                 </li>
               ))}
             </ul>
@@ -136,7 +136,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus }) =
         <div className="flex items-center gap-3">
           <div>
             <span className="text-[11px] text-slate-500 block">Total</span>
-            <span className="text-base font-bold text-slate-900">{formatEuro(order.total)}</span>
+            <span className="text-base font-bold text-slate-900">{formatTotals({ cdf: order.total, usd: order.total_usd || 0 })}</span>
           </div>
           {whatsapp && (
             <a

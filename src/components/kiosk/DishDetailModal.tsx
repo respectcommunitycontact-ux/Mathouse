@@ -6,6 +6,7 @@ import { useTabletStore } from '@/store/tabletStore';
 import { useCartStore } from '@/store/cartStore';
 import { X, Plus, Minus, Check, Flame, Leaf, Sparkles, Clock, AlertCircle } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
+import { formatMoney } from '@/lib/money';
 import confetti from 'canvas-confetti';
 
 interface DishDetailModalProps {
@@ -89,7 +90,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({ dish, isOpen, 
     }, 700);
   };
 
-  const totalPrice = (dish.price * quantity).toFixed(2);
+  const totalPrice = formatMoney(dish.price * quantity, dish.currency);
 
   return (
     <div
@@ -173,7 +174,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({ dish, isOpen, 
 
             <div className="text-right shrink-0">
               <span className="text-2xl sm:text-3xl font-extrabold text-[#E85D04] font-serif block">
-                {dish.price.toFixed(2)} €
+                {formatMoney(dish.price, dish.currency)}
               </span>
               <span className="text-[10px] uppercase tracking-wider text-[#8C8275] font-semibold">TTC</span>
             </div>
@@ -303,7 +304,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({ dish, isOpen, 
               <>
                 <span>Ajouter ({selectedGuest})</span>
                 <span>&bull;</span>
-                <span className="font-extrabold">{totalPrice} €</span>
+                <span className="font-extrabold">{totalPrice}</span>
               </>
             ) : (
               <span>Plat indisponible</span>

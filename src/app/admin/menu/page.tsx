@@ -14,11 +14,11 @@ import {
   PageContainer,
   PageHeader,
   btn,
-  formatEuro,
+  formatMoney,
   inputClass,
 } from '@/components/admin/ui';
 
-const MENU_CATEGORIES: MenuCategory[] = ['Entrées', 'Plats', 'Spécialités', 'Desserts', 'Boissons', 'Vins'];
+import { MENU_CATEGORIES } from '@/lib/menu-config';
 
 export default function MenuManagementPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -53,12 +53,12 @@ export default function MenuManagementPage() {
       id: `m-${Date.now()}`,
       name: '',
       description: '',
-      price: 15.0,
-      category: selectedCategory === 'Toutes' ? 'Plats' : selectedCategory,
-      image_url: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80',
+      price: 10000,
+      currency: 'CDF',
+      category: selectedCategory === 'Toutes' ? 'Viandes' : selectedCategory,
+      image_url: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1200&q=80',
       is_available: true,
       tags: ['Nouveau'],
-      preparation_time_minutes: 15,
     });
     setIsCreatingNew(true);
   };
@@ -190,7 +190,7 @@ export default function MenuManagementPage() {
                     </div>
 
                     <div className="flex items-center gap-4 sm:gap-5 shrink-0 justify-between sm:justify-end">
-                      <span className="text-sm font-semibold text-slate-900 w-20 text-right">{formatEuro(dish.price)}</span>
+                      <span className="text-sm font-semibold text-slate-900 w-24 text-right whitespace-nowrap">{formatMoney(dish.price, dish.currency)}</span>
                       <AvailabilitySwitch available={dish.is_available} onToggle={() => handleToggleAvailability(dish.id)} />
                       <button onClick={() => openEdit(dish)} className={btn.ghost} title="Modifier ce plat">
                         <Pencil className="w-4 h-4" />
@@ -266,18 +266,29 @@ export default function MenuManagementPage() {
                 </div>
                 <div>
                   <label htmlFor="dish-price" className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Prix (€)
+                    Prix
                   </label>
-                  <input
-                    id="dish-price"
-                    type="number"
-                    step="0.5"
-                    min="0"
-                    required
-                    value={editingDish.price}
-                    onChange={(e) => setEditingDish({ ...editingDish, price: parseFloat(e.target.value) || 0 })}
-                    className={inputClass}
-                  />
+                  <div className="flex">
+                    <input
+                      id="dish-price"
+                      type="number"
+                      step={editingDish.currency === 'USD' ? 0.5 : 500}
+                      min="0"
+                      required
+                      value={editingDish.price}
+                      onChange={(e) => setEditingDish({ ...editingDish, price: parseFloat(e.target.value) || 0 })}
+                      className={`${inputClass} rounded-r-none`}
+                    />
+                    <select
+                      aria-label="Monnaie"
+                      value={editingDish.currency ?? 'CDF'}
+                      onChange={(e) => setEditingDish({ ...editingDish, currency: e.target.value as 'CDF' | 'USD' })}
+                      className="h-10 px-2 rounded-r-lg border border-l-0 border-slate-300 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none"
+                    >
+                      <option value="CDF">FC</option>
+                      <option value="USD">$</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 

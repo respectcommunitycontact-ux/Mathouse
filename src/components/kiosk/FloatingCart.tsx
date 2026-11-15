@@ -5,6 +5,7 @@ import { useCartStore } from '@/store/cartStore';
 import { useTabletStore } from '@/store/tabletStore';
 import { ShoppingBag, ChevronUp, X, Plus, Minus, Trash2, ArrowRight } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
+import { formatMoney, formatTotals, sumMoney } from '@/lib/money';
 
 export const FloatingCart: React.FC = () => {
   const { 
@@ -14,7 +15,7 @@ export const FloatingCart: React.FC = () => {
     updateQuantity, 
     removeItem, 
     clearCart, 
-    getTotalPrice, 
+    getTotals, 
     getTotalItems,
     getItemsByPerson 
   } = useCartStore();
@@ -22,7 +23,7 @@ export const FloatingCart: React.FC = () => {
   const { setActiveScreen } = useTabletStore();
 
   const totalItems = getTotalItems();
-  const totalPrice = getTotalPrice();
+  const totalLabel = formatTotals(getTotals());
   const groupedByPerson = getItemsByPerson();
 
   if (totalItems === 0) return null;
@@ -69,7 +70,7 @@ export const FloatingCart: React.FC = () => {
               <div className="text-right">
                 <span className="text-[10px] text-slate-400 uppercase tracking-widest block font-medium">Total</span>
                 <span className="text-lg sm:text-2xl md:text-3xl font-serif font-extrabold text-[#D4AF37] gold-gradient-text">
-                  {totalPrice.toFixed(2)} €
+                  {totalLabel}
                 </span>
               </div>
 
@@ -130,9 +131,8 @@ export const FloatingCart: React.FC = () => {
             {/* Drawer Scrollable Content: Grouped by Person */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
               {Object.entries(groupedByPerson).map(([personLabel, personItems]) => {
-                const personSubtotal = personItems.reduce(
-                  (sum, it) => sum + it.menu_item.price * it.quantity,
-                  0
+                const personSubtotal = formatTotals(
+                  sumMoney(personItems.map((it) => ({ price: it.menu_item.price, quantity: it.quantity, currency: it.menu_item.currency })))
                 );
 
                 return (
@@ -152,7 +152,7 @@ export const FloatingCart: React.FC = () => {
                         </span>
                       </div>
                       <span className="text-base font-serif font-extrabold text-white">
-                        {personSubtotal.toFixed(2)} €
+                        {personSubtotal}
                       </span>
                     </div>
 
@@ -168,7 +168,7 @@ export const FloatingCart: React.FC = () => {
                               {it.menu_item.name}
                             </h5>
                             <span className="text-xs text-slate-400 font-mono">
-                              {it.menu_item.price.toFixed(2)} € l&apos;unité
+                              {formatMoney(it.menu_item.price, it.menu_item.currency)} l&apos;unité
                             </span>
                             {it.special_instructions && (
                               <p className="text-[11px] text-amber-300/90 italic mt-1 font-light">
@@ -216,7 +216,7 @@ export const FloatingCart: React.FC = () => {
               <div className="flex justify-between items-center">
                 <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Général TTC</span>
                 <span className="text-2xl sm:text-3xl font-serif font-extrabold text-[#D4AF37] gold-gradient-text">
-                  {totalPrice.toFixed(2)} €
+                  {totalLabel}
                 </span>
               </div>
 

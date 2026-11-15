@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { CartItem, MenuItem } from '@/types';
 import { playTapSound } from '@/lib/sound';
+import { MoneyTotals, sumMoney } from '@/lib/money';
 
 interface CartState {
   items: CartItem[];
@@ -14,7 +15,8 @@ interface CartState {
   setDrawerOpen: (open: boolean) => void;
   
   // Computed helpers
-  getTotalPrice: () => number;
+  /** Totaux séparés : francs congolais et dollars */
+  getTotals: () => MoneyTotals;
   getTotalItems: () => number;
   getItemsByPerson: () => Record<string, CartItem[]>;
 }
@@ -79,9 +81,9 @@ export const useCartStore = create<CartState>((set, get) => ({
 
   setDrawerOpen: (open: boolean) => set({ isDrawerOpen: open }),
 
-  getTotalPrice: () => {
+  getTotals: () => {
     const { items } = get();
-    return items.reduce((sum, item) => sum + item.menu_item.price * item.quantity, 0);
+    return sumMoney(items.map((it) => ({ price: it.menu_item.price, quantity: it.quantity, currency: it.menu_item.currency })));
   },
 
   getTotalItems: () => {

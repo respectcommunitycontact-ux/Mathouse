@@ -21,8 +21,9 @@ CREATE TABLE IF NOT EXISTS public.menu_items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
     description TEXT,
-    price NUMERIC(10, 2) NOT NULL,
-    category TEXT NOT NULL CHECK (category IN ('Entrées', 'Plats', 'Spécialités', 'Desserts', 'Boissons', 'Vins')),
+    price NUMERIC(12, 2) NOT NULL,
+    currency TEXT NOT NULL DEFAULT 'CDF' CHECK (currency IN ('CDF', 'USD')), -- FC par défaut, quelques articles en $
+    category TEXT NOT NULL CHECK (category IN ('Viandes', 'Poissons', 'Volailles', 'Fruits de mer', 'Planches Libota', 'Fast-food', 'Légumes', 'Accompagnements', 'Gâteaux d’anniversaire', 'Boissons sucrées', 'Bières', 'Jus naturels', 'Liqueurs & vins')),
     image_url TEXT NOT NULL,
     is_available BOOLEAN DEFAULT true,
     tags TEXT[] DEFAULT '{}',
@@ -48,7 +49,8 @@ CREATE TABLE IF NOT EXISTS public.orders (
     table_number INTEGER NOT NULL,
     people_count INTEGER NOT NULL DEFAULT 1,
     customer_id UUID REFERENCES public.customers(id) ON DELETE SET NULL,
-    total NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
+    total NUMERIC(12, 2) NOT NULL DEFAULT 0.00, -- en francs congolais
+    total_usd NUMERIC(10, 2), -- articles payés en dollars
     status TEXT NOT NULL DEFAULT 'nouvelle' CHECK (status IN ('nouvelle', 'preparation', 'prete', 'servie', 'annulee')),
     notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -61,7 +63,8 @@ CREATE TABLE IF NOT EXISTS public.order_items (
     order_id UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
     menu_item_id UUID REFERENCES public.menu_items(id) ON DELETE SET NULL,
     item_name TEXT NOT NULL,
-    item_price NUMERIC(10, 2) NOT NULL,
+    item_price NUMERIC(12, 2) NOT NULL,
+    currency TEXT NOT NULL DEFAULT 'CDF' CHECK (currency IN ('CDF', 'USD')),
     quantity INTEGER NOT NULL DEFAULT 1,
     person_label TEXT NOT NULL, -- Ex: "Personne 1", "Personne 2", etc.
     special_instructions TEXT,
