@@ -160,3 +160,58 @@ body {
   background: rgba(212, 175, 55, 0.4);
 }
 
+
+/* Leather menu cover (front & back of the flip-book) */
+.leather-texture {
+  background-color: #2A1B12;
+  background-image:
+    radial-gradient(ellipse at 30% 20%, rgba(255, 210, 150, 0.10), transparent 55%),
+    radial-gradient(ellipse at 80% 90%, rgba(0, 0, 0, 0.35), transparent 60%),
+    radial-gradient(rgba(0, 0, 0, 0.18) 1px, transparent 0);
+  background-size: 100% 100%, 100% 100%, 5px 5px;
+}
+
+/* Folded page corner: tap to turn the page */
+.page-curl {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.page-curl::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: 46%;
+  height: 46%;
+  transition: width 0.25s ease, height 0.25s ease;
+  animation: curlHint 3.2s ease-in-out infinite;
+}
+.page-curl-right::before {
+  right: 0;
+  border-top-left-radius: 6px;
+  background: linear-gradient(135deg, #E9E1D2 0%, #F6F1E7 45%, rgba(0, 0, 0, 0.22) 50%, rgba(0, 0, 0, 0) 62%);
+  box-shadow: -3px -3px 8px rgba(0, 0, 0, 0.18);
+  border-bottom-right-radius: 16px;
+}
+.page-curl-left::before {
+  left: 0;
+  border-top-right-radius: 6px;
+  background: linear-gradient(225deg, #E9E1D2 0%, #F6F1E7 45%, rgba(0, 0, 0, 0.22) 50%, rgba(0, 0, 0, 0) 62%);
+  box-shadow: 3px -3px 8px rgba(0, 0, 0, 0.18);
+  border-bottom-left-radius: 16px;
+  animation-delay: 1.6s;
+}
+.page-curl:hover::before,
+.page-curl:active::before {
+  width: 70%;
+  height: 70%;
+}
+@keyframes curlHint {
+  0%, 70%, 100% { width: 46%; height: 46%; }
+  80% { width: 62%; height: 62%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-curl::before { animation: none; }
+}
