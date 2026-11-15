@@ -1,4 +1,5 @@
 import { MenuItem, TableRecord, Customer, Order } from '@/types';
+import { PLACES } from './places';
 
 /**
  * La vraie carte de Mat House.
@@ -653,11 +654,11 @@ export const SCREENSAVER_IMAGES = [
   },
 ];
 
-/** Les 16 tables du restaurant, toutes libres au départ. */
-export const INITIAL_TABLES: TableRecord[] = Array.from({ length: 16 }, (_, i) => ({
-  id: `table-${i + 1}`,
-  number: i + 1,
-  tablet_id: `TAB-${String(i + 1).padStart(2, '0')}`,
+/** Tables, chambres et appartements (voir lib/places.ts), tous libres au départ. */
+export const INITIAL_TABLES: TableRecord[] = PLACES.map((p) => ({
+  id: `table-${p.number}`,
+  number: p.number,
+  tablet_id: p.slug,
   is_online: false,
   battery_level: 100,
   status: 'libre',

@@ -1,12 +1,13 @@
 import { Order, MenuItem, Customer, TableRecord, OrderStatus } from '@/types';
 import { INITIAL_MENU_ITEMS, INITIAL_TABLES, INITIAL_CUSTOMERS, INITIAL_ORDERS } from './mock-data';
 import { supabase, isSupabaseConfigured } from './supabase';
+import { PLACES } from './places';
 
 const STORAGE_KEYS = {
   ORDERS: 'resto_orders_v3',
   MENU: 'resto_menu_v2',
   CUSTOMERS: 'resto_customers_v2',
-  TABLES: 'resto_tables_v2',
+  TABLES: 'resto_tables_v3',
   CONFIG: 'resto_tablet_config_v1',
 };
 
@@ -308,18 +309,37 @@ export const DataService = {
   },
 
   // --- TABLES ---
+  /** Every place (tables, chambres, appartements) with its current status. */
   async getTables(): Promise<TableRecord[]> {
+    let rows: TableRecord[] | null = null;
     if (isSupabaseConfigured && supabase) {
       try {
         const { data, error } = await supabase.from('tables').select('*').order('number');
-        if (!error && data && data.length > 0) return data as TableRecord[];
+        if (!error && data) rows = data as TableRecord[];
       } catch (e) {
         console.warn('Supabase fetch tables failed, using local storage fallback', e);
       }
     }
-    if (typeof window === 'undefined') return INITIAL_TABLES;
-    const raw = localStorage.getItem(STORAGE_KEYS.TABLES);
-    return raw ? JSON.parse(raw) : INITIAL_TABLES;
+    if (!rows) {
+      if (typeof window === 'undefined') return INITIAL_TABLES;
+      const raw = localStorage.getItem(STORAGE_KEYS.TABLES);
+      rows = raw ? JSON.parse(raw) : INITIAL_TABLES;
+    }
+    // The list of places comes from the app; the database only provides statuses.
+    return PLACES.map((p) => {
+      const row = rows!.find((r) => r.number === p.number);
+      return (
+        row ?? {
+          id: `table-${p.number}`,
+          number: p.number,
+          tablet_id: p.slug,
+          is_online: false,
+          battery_level: 100,
+          status: 'libre',
+          updated_at: new Date().toISOString(),
+        }
+      );
+    });
   },
 
   async updateTableStatus(tableNumber: number, status: TableRecord['status']): Promise<void> {

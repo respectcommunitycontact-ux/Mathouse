@@ -7,6 +7,7 @@ import { DataService } from '@/lib/data-service';
 import { useTabletStore } from '@/store/tabletStore';
 import { playTapSound } from '@/lib/sound';
 import { enterFullscreen } from '@/lib/pwa';
+import { TABLES, placeLabel } from '@/lib/places';
 import { Bell, Receipt, HandPlatter } from 'lucide-react';
 
 const STATUS: Record<TableStatus, { label: string; dot: string; ring: string }> = {
@@ -80,14 +81,14 @@ export const TablePicker: React.FC = () => {
                   }`}
                 >
                   {t.status === 'serveur_appele' ? <Bell className="w-3.5 h-3.5" /> : <Receipt className="w-3.5 h-3.5" />}
-                  Table {t.number} · {STATUS[t.status].label}
+                  {placeLabel(t.number)} · {STATUS[t.status].label}
                 </span>
               ))}
             </div>
           )}
 
           <div className="mt-6 grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-            {tables.map((t) => {
+            {tables.filter((t) => TABLES.some((p) => p.number === t.number)).map((t) => {
               const s = STATUS[t.status];
               const isLast = hasHistory && t.number === config.tableNumber;
               return (

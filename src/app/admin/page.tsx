@@ -18,6 +18,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
+import { placeLabel } from '@/lib/places';
 import {
   AvailabilitySwitch,
   Card,
@@ -168,7 +169,7 @@ export default function AdminDashboardPage() {
                     {t.number}
                   </span>
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">Table {t.number} appelle un serveur</p>
+                    <p className="text-sm font-semibold text-slate-900">{placeLabel(t.number)} appelle le personnel</p>
                     <p className="text-xs text-slate-500">Rendez-vous à la table puis marquez la demande comme traitée.</p>
                   </div>
                 </div>
@@ -185,7 +186,7 @@ export default function AdminDashboardPage() {
                     {t.number}
                   </span>
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">Table {t.number} demande l’addition</p>
+                    <p className="text-sm font-semibold text-slate-900">{placeLabel(t.number)} demande l’addition</p>
                     <p className="text-xs text-slate-500">Une fois réglée, libérez la table depuis « Salle ».</p>
                   </div>
                 </div>
@@ -264,7 +265,7 @@ export default function AdminDashboardPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left text-xs font-semibold text-slate-500 border-b border-slate-200">
-                      <th className="px-5 py-2.5">Table</th>
+                      <th className="px-5 py-2.5">Lieu</th>
                       <th className="px-5 py-2.5">Commande</th>
                       <th className="px-5 py-2.5">Client</th>
                       <th className="px-5 py-2.5">Attente</th>
@@ -278,7 +279,7 @@ export default function AdminDashboardPage() {
                         const wait = minutesSince(ord.created_at);
                         return (
                           <tr key={ord.id} className="hover:bg-slate-50">
-                            <td className="px-5 py-3 font-semibold text-slate-900">Table {ord.table_number}</td>
+                            <td className="px-5 py-3 font-semibold text-slate-900">{placeLabel(ord.table_number)}</td>
                             <td className="px-5 py-3 text-slate-600">
                               {ord.order_number}
                               <span className="text-slate-400"> · {ord.items.reduce((s, i) => s + i.quantity, 0)} articles</span>
@@ -325,7 +326,7 @@ export default function AdminDashboardPage() {
                     className={`rounded-lg border bg-white p-3 hover:shadow-sm transition ${TABLE_STATUS[tbl.status].card}`}
                     title={TABLE_STATUS[tbl.status].help}
                   >
-                    <p className="text-sm font-bold text-slate-900">Table {tbl.number}</p>
+                    <p className="text-sm font-bold text-slate-900">{placeLabel(tbl.number)}</p>
                     <div className="mt-2">
                       <StatusBadge status={tbl.status} />
                     </div>

@@ -13,10 +13,12 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playTapSound } from '@/lib/sound';
+import { placeLabel } from '@/lib/places';
 
 export const OrderConfirmation: React.FC = () => {
   const { 
     config, 
+    guestMode,
     lastOrderNumber, 
     customerSession, 
     resetSessionForNewRound, 
@@ -79,7 +81,7 @@ export const OrderConfirmation: React.FC = () => {
         </div>
 
         <div className="px-4 py-1.5 rounded-full glass-panel text-[#E5C158] text-xs font-bold font-mono border border-[#D4AF37]/40 shadow-gold-subtle">
-          TABLE {config.tableNumber}
+          {placeLabel(config.tableNumber).toUpperCase()}
         </div>
       </div>
 
@@ -133,7 +135,8 @@ export const OrderConfirmation: React.FC = () => {
           </div>
         </div>
 
-        {/* Main action: give the tablet back to the waitress */}
+        {/* Main action: give the tablet back to the waitress (not on a customer's own phone) */}
+        {!guestMode && (
         <button
           onClick={handleHandBack}
           className="w-full max-w-md mx-auto mb-3.5 min-h-[60px] py-4 px-6 rounded-full bg-[#E85D04] hover:bg-[#F06A10] text-white font-extrabold text-sm sm:text-base shadow-lg flex items-center justify-center gap-2.5 transition-all active:scale-[0.98]"
@@ -141,6 +144,7 @@ export const OrderConfirmation: React.FC = () => {
           <HandPlatter className="w-5 h-5" />
           <span>C’est terminé : rendre la tablette au serveur</span>
         </button>
+        )}
 
         {/* Action Capsule Buttons */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-w-md mx-auto">
@@ -175,7 +179,15 @@ export const OrderConfirmation: React.FC = () => {
             className="text-xs text-slate-400 hover:text-white transition-colors inline-flex items-center gap-2 py-2 px-5 rounded-full hover:bg-white/5 border border-transparent hover:border-white/10"
           >
             <Bell className="w-4 h-4 text-[#D4AF37]" />
-            <span>{waiterCalled ? 'Serveur prévenu...' : 'Besoin d\'assistance ? Appeler un serveur'}</span>
+            <span>
+              {waiterCalled
+                ? guestMode
+                  ? 'Restaurant prévenu…'
+                  : 'Serveur prévenu…'
+                : guestMode
+                ? 'Besoin d’aide ? Contacter le restaurant'
+                : 'Besoin d’assistance ? Appeler un serveur'}
+            </span>
           </button>
         </div>
       </div>
