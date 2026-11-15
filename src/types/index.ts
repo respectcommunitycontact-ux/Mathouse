@@ -103,6 +103,7 @@ export interface TabletConfig {
 }
 
 export type KioskScreen = 
+  | 'table-picker' // la serveuse choisit la table
   | 'welcome'
   | 'people-picker'
   | 'menu'
