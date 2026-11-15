@@ -4,15 +4,15 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
+import {
   LayoutDashboard,
-  ChefHat, 
-  UtensilsCrossed, 
-  LayoutGrid, 
-  Users, 
-  Tablet, 
+  ChefHat,
+  UtensilsCrossed,
+  LayoutGrid,
+  Users,
+  Tablet,
   ExternalLink,
-  Volume2
+  Volume2,
 } from 'lucide-react';
 import { playOrderChime, playTapSound } from '@/lib/sound';
 import { DataService } from '@/lib/data-service';
@@ -20,21 +20,17 @@ import { DataService } from '@/lib/data-service';
 export const AdminNavbar: React.FC = () => {
   const pathname = usePathname();
   const [serverCallCount, setServerCallCount] = useState(0);
+  const [billCount, setBillCount] = useState(0);
   const [activeOrderCount, setActiveOrderCount] = useState(0);
 
-  const syncBadges = async () => {
-    DataService.initData();
-    const [tables, orders] = await Promise.all([
-      DataService.getTables(),
-      DataService.getOrders(),
-    ]);
-    const calls = tables.filter((t) => t.status === 'serveur_appele').length;
-    const active = orders.filter((o) => o.status !== 'servie' && o.status !== 'annulee').length;
-    setServerCallCount(calls);
-    setActiveOrderCount(active);
-  };
-
   useEffect(() => {
+    const syncBadges = async () => {
+      DataService.initData();
+      const [tables, orders] = await Promise.all([DataService.getTables(), DataService.getOrders()]);
+      setServerCallCount(tables.filter((t) => t.status === 'serveur_appele').length);
+      setBillCount(tables.filter((t) => t.status === 'addition_demandee').length);
+      setActiveOrderCount(orders.filter((o) => o.status !== 'servie' && o.status !== 'annulee').length);
+    };
     syncBadges();
     const unsubscribe = DataService.subscribe(() => {
       syncBadges();
@@ -42,99 +38,97 @@ export const AdminNavbar: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
+  const tableAlerts = serverCallCount + billCount;
+
   const navLinks = [
-    { 
-      href: '/admin', 
-      label: 'Tableau de Bord', 
-      shortLabel: 'Accueil', 
+    {
+      href: '/admin',
+      label: 'Vue d’ensemble',
+      shortLabel: 'Accueil',
+      hint: 'Le service en un coup d’œil',
       icon: LayoutDashboard,
-      badge: null,
+      badge: null as null | { count: number; alert: boolean },
     },
-    { 
-      href: '/admin/cuisine', 
-      label: 'Cuisine KDS', 
-      shortLabel: 'Cuisine', 
+    {
+      href: '/admin/cuisine',
+      label: 'Commandes',
+      shortLabel: 'Commandes',
+      hint: 'À préparer et à servir',
       icon: ChefHat,
-      badge: activeOrderCount > 0 ? { count: activeOrderCount, isAlert: false } : null,
+      badge: activeOrderCount > 0 ? { count: activeOrderCount, alert: false } : null,
     },
-    { 
-      href: '/admin/menu', 
-      label: 'Gestion du Menu', 
-      shortLabel: 'Menu', 
+    {
+      href: '/admin/tables',
+      label: 'Salle & tablettes',
+      shortLabel: 'Salle',
+      hint: 'Appels serveur et additions',
+      icon: LayoutGrid,
+      badge: tableAlerts > 0 ? { count: tableAlerts, alert: true } : null,
+    },
+    {
+      href: '/admin/menu',
+      label: 'Carte & stocks',
+      shortLabel: 'Carte',
+      hint: 'Plats, prix et ruptures',
       icon: UtensilsCrossed,
       badge: null,
     },
-    { 
-      href: '/admin/tables', 
-      label: 'Tables & Tablettes', 
-      shortLabel: 'Tables', 
-      icon: LayoutGrid,
-      badge: serverCallCount > 0 ? { count: serverCallCount, isAlert: true } : null,
-    },
-    { 
-      href: '/admin/customers', 
-      label: 'Clients CRM', 
-      shortLabel: 'Clients', 
+    {
+      href: '/admin/customers',
+      label: 'Clients',
+      shortLabel: 'Clients',
+      hint: 'Contacts WhatsApp',
       icon: Users,
       badge: null,
     },
   ];
 
+  const isActive = (href: string) => (href === '/admin' ? pathname === '/admin' : pathname?.startsWith(href));
+
   return (
-    <header className="bg-[#0D121B]/90 backdrop-blur-xl border-b border-white/[0.08] select-none flex flex-col shrink-0 z-40 shadow-2xl">
-      {/* Main Top Header Bar */}
-      <div className="px-4 sm:px-6 py-2.5 flex items-center justify-between gap-4">
-        {/* Brand & Mode with Official Logo */}
-        <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-          <Link 
-            href="/admin" 
-            onClick={playTapSound}
-            className="relative h-8 sm:h-9 w-28 sm:w-36 flex items-center shrink-0 transition-opacity hover:opacity-90 active:scale-95"
-            title="MAT HOUSE RESTAURANT - Console Admin"
-          >
-            <Image
-              src="/logo.png"
-              alt="Mat House Restaurant"
-              fill
-              className="object-contain object-left filter drop-shadow-[0_2px_8px_rgba(212,175,55,0.4)]"
-              priority
-            />
-          </Link>
-
-          <div className="h-4 w-px bg-white/10 hidden 2xl:block" />
-
-          <span className="hidden 2xl:inline-flex items-center gap-2 text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]" />
-            Console d&apos;Administration
+    <>
+      {/* Desktop / tablet sidebar */}
+      <aside className="hidden md:flex w-60 lg:w-64 shrink-0 flex-col bg-[#14171F] text-slate-300 border-r border-black/20">
+        <Link
+          href="/admin"
+          onClick={playTapSound}
+          className="px-5 pt-5 pb-4 block border-b border-white/[0.06]"
+          title="Mat House — Administration"
+        >
+          <div className="relative h-9 w-40">
+            <Image src="/logo.png" alt="Mat House Restaurant" fill className="object-contain object-left" priority />
+          </div>
+          <span className="mt-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+            Administration
           </span>
-        </div>
+        </Link>
 
-        {/* Center Desktop Navigation Tabs */}
-        <nav className="hidden md:flex items-center gap-1 bg-[#131B29]/80 p-1 rounded-2xl border border-white/[0.06] shrink-0">
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1" aria-label="Navigation administration">
           {navLinks.map((item) => {
-            const isActive = pathname === item.href;
+            const active = isActive(item.href);
             const Icon = item.icon;
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={playTapSound}
-                className={`px-2.5 lg:px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all duration-200 relative whitespace-nowrap ${
-                  isActive
-                    ? 'bg-[#D4AF37]/15 text-[#E5C158] border border-[#D4AF37]/30 font-bold shadow-sm'
-                    : 'text-slate-400 hover:text-white hover:bg-[#1A2333]'
+                aria-current={active ? 'page' : undefined}
+                className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-lg transition ${
+                  active ? 'bg-white/[0.08] text-white' : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#E5C158]' : 'text-slate-400'}`} />
-                <span className="hidden xl:inline">{item.label}</span>
-                <span className="inline xl:hidden">{item.shortLabel}</span>
-
+                {active && <span className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r bg-[#E85D04]" />}
+                <Icon className={`w-[18px] h-[18px] shrink-0 ${active ? 'text-[#F48C06]' : ''}`} />
+                <span className="flex-1 min-w-0">
+                  <span className="block text-sm font-semibold leading-tight">{item.label}</span>
+                  <span className="block text-[11px] text-slate-500 leading-tight mt-0.5 truncate">{item.hint}</span>
+                </span>
                 {item.badge && (
-                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold leading-none ${
-                    item.badge.isAlert 
-                      ? 'bg-rose-500 text-white animate-pulse' 
-                      : 'bg-[#D4AF37] text-[#0B0E14]'
-                  }`}>
+                  <span
+                    className={`min-w-[22px] h-[22px] px-1.5 rounded-full text-[11px] font-bold flex items-center justify-center ${
+                      item.badge.alert ? 'bg-rose-500 text-white' : 'bg-[#E85D04] text-white'
+                    }`}
+                  >
                     {item.badge.count}
                   </span>
                 )}
@@ -143,57 +137,70 @@ export const AdminNavbar: React.FC = () => {
           })}
         </nav>
 
-        {/* Right Action Tools */}
-        <div className="flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
+        <div className="px-3 py-4 border-t border-white/[0.06] space-y-1">
+          <Link
+            href="/"
+            target="_blank"
+            onClick={playTapSound}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/[0.04] transition"
+            title="Ouvrir l’écran client des tablettes dans un nouvel onglet"
+          >
+            <Tablet className="w-[18px] h-[18px]" />
+            <span className="flex-1">Voir l’écran client</span>
+            <ExternalLink className="w-3.5 h-3.5 opacity-60" />
+          </Link>
           <button
             onClick={() => {
               playTapSound();
               playOrderChime();
             }}
-            className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 border border-white/10 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 whitespace-nowrap"
-            title="Tester le carillon sonore"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/[0.04] transition"
+            title="Jouer le son qui annonce une nouvelle commande"
           >
-            <Volume2 className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
-            <span className="hidden sm:inline">Carillon</span>
+            <Volume2 className="w-[18px] h-[18px]" />
+            <span>Tester le son</span>
           </button>
-
-          <Link
-            href="/"
-            target="_blank"
-            onClick={playTapSound}
-            className="px-3 sm:px-3.5 py-1.5 rounded-xl bg-[#D4AF37] hover:bg-[#E5C158] text-[#0B0E14] text-xs font-extrabold flex items-center gap-1.5 transition active:scale-95 shadow-sm whitespace-nowrap shrink-0"
-            title="Ouvrir le Kiosque Tablette Client"
-          >
-            <Tablet className="w-3.5 h-3.5 shrink-0" />
-            <span className="hidden sm:inline">Mode Kiosque</span>
-            <ExternalLink className="w-3 h-3 shrink-0 opacity-80" />
-          </Link>
         </div>
-      </div>
+      </aside>
 
-      {/* Mobile Navigation Bar (< md) */}
-      <nav className="md:hidden border-t border-white/[0.08] bg-[#0A0E17] px-2 py-1.5 grid grid-cols-5 gap-1">
+      {/* Mobile top bar + bottom tabs */}
+      <header className="md:hidden shrink-0 bg-[#14171F] px-4 h-14 flex items-center justify-between">
+        <div className="relative h-8 w-32">
+          <Image src="/logo.png" alt="Mat House Restaurant" fill className="object-contain object-left" priority />
+        </div>
+        <Link
+          href="/"
+          target="_blank"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-200 px-3 h-8 rounded-lg bg-white/10"
+        >
+          <Tablet className="w-3.5 h-3.5" /> Écran client
+        </Link>
+      </header>
+      <nav
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 grid grid-cols-5 shadow-[0_-4px_16px_rgba(15,23,42,0.06)]"
+        aria-label="Navigation administration"
+      >
         {navLinks.map((item) => {
-          const isActive = pathname === item.href;
+          const active = isActive(item.href);
           const Icon = item.icon;
           return (
             <Link
               key={item.href}
               href={item.href}
               onClick={playTapSound}
-              className={`py-1.5 px-1 rounded-xl text-[10px] font-semibold flex flex-col items-center justify-center gap-0.5 transition-all relative ${
-                isActive
-                  ? 'bg-[#D4AF37]/15 text-[#E5C158] border border-[#D4AF37]/30 font-bold'
-                  : 'text-slate-400 hover:text-white'
+              aria-current={active ? 'page' : undefined}
+              className={`relative py-2 flex flex-col items-center gap-0.5 text-[11px] font-semibold ${
+                active ? 'text-[#E85D04]' : 'text-slate-500'
               }`}
             >
-              <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#E5C158]' : 'text-slate-400'}`} />
-              <span className="truncate tracking-tight">{item.shortLabel}</span>
-
+              <Icon className="w-5 h-5" />
+              <span>{item.shortLabel}</span>
               {item.badge && (
-                <span className={`absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full text-[9px] font-mono font-bold flex items-center justify-center ${
-                  item.badge.isAlert ? 'bg-rose-500 text-white' : 'bg-[#D4AF37] text-[#0B0E14]'
-                }`}>
+                <span
+                  className={`absolute top-1 right-[22%] min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold text-white flex items-center justify-center ${
+                    item.badge.alert ? 'bg-rose-500' : 'bg-[#E85D04]'
+                  }`}
+                >
                   {item.badge.count}
                 </span>
               )}
@@ -201,6 +208,6 @@ export const AdminNavbar: React.FC = () => {
           );
         })}
       </nav>
-    </header>
+    </>
   );
 };
