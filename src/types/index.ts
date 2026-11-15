@@ -2,13 +2,31 @@ export type OrderStatus = 'nouvelle' | 'preparation' | 'prete' | 'servie' | 'ann
 
 export type TableStatus = 'libre' | 'occupee' | 'addition_demandee' | 'serveur_appele';
 
-export type MenuCategory = 'Entrées' | 'Plats' | 'Spécialités' | 'Desserts' | 'Boissons' | 'Vins';
+export type MenuCategory =
+  | 'Viandes'
+  | 'Poissons'
+  | 'Volailles'
+  | 'Fruits de mer'
+  | 'Planches Libota'
+  | 'Fast-food'
+  | 'Légumes'
+  | 'Accompagnements'
+  | 'Gâteaux d’anniversaire'
+  | 'Boissons sucrées'
+  | 'Bières'
+  | 'Jus naturels'
+  | 'Liqueurs & vins';
+
+/** CDF = franc congolais (défaut), USD = dollar. Jamais convertis. */
+export type Currency = 'CDF' | 'USD';
 
 export interface MenuItem {
   id: string;
   name: string;
   description: string;
   price: number;
+  /** Défaut : CDF (francs congolais) */
+  currency?: Currency;
   category: MenuCategory;
   image_url: string;
   is_available: boolean;
@@ -32,6 +50,7 @@ export interface OrderItem {
   menu_item_id: string;
   item_name: string;
   item_price: number;
+  currency?: Currency;
   quantity: number;
   person_label: string; // "Personne 1", "Personne 2", etc.
   special_instructions?: string;
@@ -44,7 +63,10 @@ export interface Order {
   people_count: number;
   customer_id?: string;
   customer?: Customer;
+  /** Total en francs congolais */
   total: number;
+  /** Total des articles en dollars (s'il y en a) */
+  total_usd?: number;
   status: OrderStatus;
   notes?: string;
   items: OrderItem[];

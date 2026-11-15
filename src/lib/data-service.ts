@@ -3,8 +3,8 @@ import { INITIAL_MENU_ITEMS, INITIAL_TABLES, INITIAL_CUSTOMERS, INITIAL_ORDERS }
 import { supabase, isSupabaseConfigured } from './supabase';
 
 const STORAGE_KEYS = {
-  ORDERS: 'resto_orders_v1',
-  MENU: 'resto_menu_v1',
+  ORDERS: 'resto_orders_v2',
+  MENU: 'resto_menu_v2',
   CUSTOMERS: 'resto_customers_v1',
   TABLES: 'resto_tables_v1',
   CONFIG: 'resto_tablet_config_v1',
@@ -142,6 +142,7 @@ export const DataService = {
           people_count: newOrder.people_count,
           customer_id: newOrder.customer_id,
           total: newOrder.total,
+          total_usd: newOrder.total_usd ?? null,
           status: newOrder.status,
           notes: newOrder.notes,
         });
@@ -154,6 +155,7 @@ export const DataService = {
               menu_item_id: it.menu_item_id,
               item_name: it.item_name,
               item_price: it.item_price,
+              currency: it.currency ?? 'CDF',
               quantity: it.quantity,
               person_label: it.person_label,
               special_instructions: it.special_instructions,

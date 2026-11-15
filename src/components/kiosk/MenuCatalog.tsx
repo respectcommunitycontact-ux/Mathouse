@@ -21,66 +21,14 @@ import {
   Hand,
 } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
+import { CATEGORY_META, MENU_CATEGORIES } from '@/lib/menu-config';
+import { formatMoney } from '@/lib/money';
 
-const BOOK_CATEGORIES: MenuCategory[] = ['Entrées', 'Plats', 'Spécialités', 'Desserts', 'Boissons', 'Vins'];
+const BOOK_CATEGORIES: MenuCategory[] = MENU_CATEGORIES;
 const CATEGORIES: ('Toutes' | MenuCategory)[] = ['Toutes', ...BOOK_CATEGORIES];
 
 /** Dishes per page (pages have a fixed design size, so this guarantees everything fits). */
 const ITEMS_PER_PAGE = 5;
-
-// Category metadata for the editorial presentation
-const CATEGORY_META: Record<
-  string,
-  {
-    subtitle: string;
-    scriptTag: string;
-    english: string;
-    headerImage: string;
-  }
-> = {
-  Toutes: {
-    subtitle: 'Carte Gastronomique & Créations Gourmandes',
-    scriptTag: 'Cuisine d’Émotion & Terroir',
-    english: 'Menu',
-    headerImage: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-  },
-  Entrées: {
-    subtitle: 'Pour Débuter la Dégustation',
-    scriptTag: 'Fraîcheur & Finesse',
-    english: 'Appetizers',
-    headerImage: 'https://images.unsplash.com/photo-1608897013039-887f21d8c804?auto=format&fit=crop&w=600&q=80',
-  },
-  Plats: {
-    subtitle: 'Pièces Nobles & Cuissons Maîtrisées',
-    scriptTag: 'Viandes & Poissons d’Exception',
-    english: 'Main Courses',
-    headerImage: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-  },
-  Spécialités: {
-    subtitle: 'La Signature Unique de Notre Chef',
-    scriptTag: 'Incontournables de la Maison',
-    english: 'Chef Specials',
-    headerImage: 'https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=600&q=80',
-  },
-  Desserts: {
-    subtitle: 'Douceurs Sucrées & Pâtisseries Fines',
-    scriptTag: 'Gourmandise & Délicatesse',
-    english: 'Artisanal Sweets',
-    headerImage: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80',
-  },
-  Boissons: {
-    subtitle: 'Mocktails, Nectars & Rafraîchissements',
-    scriptTag: 'Élixirs & Infusions Fraîches',
-    english: 'Drinks',
-    headerImage: 'https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&w=600&q=80',
-  },
-  Vins: {
-    subtitle: 'Sélection de Grands Crus & Domaines',
-    scriptTag: 'Cave du Sommelier',
-    english: 'Wine Cellar',
-    headerImage: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=600&q=80',
-  },
-};
 
 type BookPageModel =
   | { kind: 'cover' }
@@ -153,7 +101,7 @@ export const MenuCatalog: React.FC = () => {
 
   const chefSpecial =
     menuItems.find((item) => item.tags?.includes('Signature') && item.is_available) ||
-    menuItems.find((item) => item.category === 'Plats') ||
+    menuItems.find((item) => item.category === 'Volailles') ||
     menuItems[0];
 
   // ---------- Paginate the menu into book pages ----------
@@ -238,7 +186,7 @@ export const MenuCatalog: React.FC = () => {
             </h4>
             <div className="flex-1 border-b border-dotted border-[#CFC5B4] min-w-[12px] translate-y-[-3px]" />
             <span className="text-[15px] font-extrabold text-[#E85D04] font-serif shrink-0">
-              {dish.price.toFixed(2)} €
+              {formatMoney(dish.price, dish.currency)}
             </span>
           </div>
 
@@ -325,7 +273,7 @@ export const MenuCatalog: React.FC = () => {
       <h2 className="text-[38px] font-bold font-serif text-[#2B2D42] leading-tight">Sommaire</h2>
       <p className="font-script text-[20px] text-[#E85D04] -mt-1">Touchez une rubrique pour y aller</p>
 
-      <div className="mt-6 space-y-1">
+      <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-1">
         {BOOK_CATEGORIES.map((category) => {
           const page = firstPageOfCategory[category];
           const meta = CATEGORY_META[category];
@@ -339,17 +287,13 @@ export const MenuCatalog: React.FC = () => {
                 playTapSound();
                 if (page !== undefined) turnToPage(page);
               }}
-              className="w-full flex items-center gap-3 py-2 px-2 -mx-2 rounded-xl text-left transition-colors hover:bg-orange-500/[0.06] active:bg-orange-500/[0.12] disabled:opacity-35"
+              className="w-full flex items-center gap-2.5 py-1.5 px-1.5 -mx-1.5 rounded-xl text-left transition-colors hover:bg-orange-500/[0.06] active:bg-orange-500/[0.12] disabled:opacity-35"
             >
-              <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-[#E85D04]/25 shrink-0">
+              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#E85D04]/25 shrink-0">
                 <img src={meta.headerImage} alt="" className="w-full h-full object-cover" draggable={false} />
               </div>
-              <div className="min-w-0">
-                <span className="block text-[17px] font-bold font-serif text-[#2B2D42] leading-tight">{category}</span>
-                <span className="block text-[11px] text-[#8C8275] truncate">{meta.subtitle}</span>
-              </div>
-              <div className="flex-1 border-b border-dotted border-[#CFC5B4] min-w-[16px] self-end mb-3" />
-              <span className="font-serif font-bold text-[#E85D04] text-[15px] w-6 text-right">
+              <span className="flex-1 min-w-0 text-[13px] font-bold font-serif text-[#2B2D42] leading-tight [overflow-wrap:anywhere]">{category}</span>
+              <span className="font-serif font-bold text-[#E85D04] text-[14px] w-6 text-right shrink-0">
                 {page !== undefined ? page + 1 : '–'}
               </span>
             </button>
@@ -446,7 +390,7 @@ export const MenuCatalog: React.FC = () => {
           </div>
           <h3 className="mt-5 text-[24px] font-serif font-bold text-[#F5E6B3] leading-tight">{chefSpecial.name}</h3>
           <span className="mt-3 px-5 py-2 rounded-full bg-[#E85D04] text-white text-sm font-bold shadow-lg active:scale-95">
-            Découvrir • {chefSpecial.price.toFixed(2)} €
+            Découvrir • {formatMoney(chefSpecial.price, chefSpecial.currency)}
           </span>
         </button>
       )}

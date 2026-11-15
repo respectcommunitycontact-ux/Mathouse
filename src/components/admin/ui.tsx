@@ -184,8 +184,7 @@ export const AvailabilitySwitch: React.FC<{ available: boolean; onToggle: () => 
   </button>
 );
 
-export const formatEuro = (n: number) =>
-  n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+export { formatMoney, formatTotals } from '@/lib/money';
 
 export const PageContainer: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
   <div className={`w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 pb-24 md:pb-10 ${className}`}>{children}</div>

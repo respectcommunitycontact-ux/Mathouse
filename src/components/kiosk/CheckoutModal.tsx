@@ -6,9 +6,10 @@ import { useTabletStore } from '@/store/tabletStore';
 import { DataService } from '@/lib/data-service';
 import { ArrowLeft, Send, User, MessageCircle, AlertCircle, Sparkles } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
+import { formatTotals } from '@/lib/money';
 
 export const CheckoutModal: React.FC = () => {
-  const { items, getTotalPrice, clearCart } = useCartStore();
+  const { items, getTotals, clearCart } = useCartStore();
   const { 
     config, 
     peopleCount, 
@@ -31,7 +32,7 @@ export const CheckoutModal: React.FC = () => {
     }
   }, [customerSession]);
 
-  const totalPrice = getTotalPrice();
+  const totals = getTotals();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,7 +62,8 @@ export const CheckoutModal: React.FC = () => {
       const newOrder = await DataService.createOrder({
         table_number: config.tableNumber,
         people_count: peopleCount,
-        total: totalPrice,
+        total: totals.cdf,
+        total_usd: totals.usd > 0 ? totals.usd : undefined,
         status: 'nouvelle',
         notes: orderNotes.trim() || undefined,
         customer: {
@@ -78,6 +80,7 @@ export const CheckoutModal: React.FC = () => {
           menu_item_id: it.menu_item.id,
           item_name: it.menu_item.name,
           item_price: it.menu_item.price,
+          currency: it.menu_item.currency,
           quantity: it.quantity,
           person_label: it.person_label,
           special_instructions: it.special_instructions,
@@ -133,7 +136,7 @@ export const CheckoutModal: React.FC = () => {
           </h2>
           <p className="text-slate-400 text-xs sm:text-base font-light">
             Montant global de la table :{' '}
-            <span className="text-[#D4AF37] font-serif font-extrabold text-xl sm:text-2xl ml-1 gold-gradient-text">{totalPrice.toFixed(2)} €</span>
+            <span className="text-[#D4AF37] font-serif font-extrabold text-xl sm:text-2xl ml-1 gold-gradient-text">{formatTotals(totals)}</span>
           </p>
         </div>
 

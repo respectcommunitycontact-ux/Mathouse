@@ -30,7 +30,8 @@ import {
   StatusLegend,
   TABLE_STATUS,
   btn,
-  formatEuro,
+  formatMoney,
+  formatTotals,
   inputClass,
 } from '@/components/admin/ui';
 
@@ -71,8 +72,12 @@ export default function AdminDashboardPage() {
   const busyTables = tables.length - freeTables.length;
   const outOfStock = menuItems.filter((m) => !m.is_available);
 
-  const totalRevenueToday = orders.filter((o) => o.status !== 'annulee').reduce((sum, o) => sum + (o.total || 0), 0);
-  const averageBasket = orders.length > 0 ? totalRevenueToday / orders.length : 0;
+  const billedOrders = orders.filter((o) => o.status !== 'annulee');
+  const revenue = {
+    cdf: billedOrders.reduce((sum, o) => sum + (o.total || 0), 0),
+    usd: billedOrders.reduce((sum, o) => sum + (o.total_usd || 0), 0),
+  };
+  const averageBasket = billedOrders.length > 0 ? revenue.cdf / billedOrders.length : 0;
 
   const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 
@@ -116,8 +121,8 @@ export default function AdminDashboardPage() {
     },
     {
       label: 'Chiffre d’affaires du jour',
-      value: formatEuro(totalRevenueToday),
-      sub: `Panier moyen ${formatEuro(averageBasket)}`,
+      value: formatMoney(revenue.cdf),
+      sub: revenue.usd > 0 ? `+ ${formatMoney(revenue.usd, 'USD')} · panier moyen ${formatMoney(averageBasket)}` : `Panier moyen ${formatMoney(averageBasket)}`,
       icon: TrendingUp,
       href: null,
       tone: 'text-emerald-700 bg-emerald-50',
@@ -289,7 +294,7 @@ export default function AdminDashboardPage() {
                                 {wait} min
                               </span>
                             </td>
-                            <td className="px-5 py-3 text-right font-semibold text-slate-900">{formatEuro(ord.total)}</td>
+                            <td className="px-5 py-3 text-right font-semibold text-slate-900">{formatTotals({ cdf: ord.total, usd: ord.total_usd || 0 })}</td>
                           </tr>
                         );
                       })}
@@ -362,7 +367,7 @@ export default function AdminDashboardPage() {
                     {dish.name}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {dish.category} · {formatEuro(dish.price)}
+                    {dish.category} · {formatMoney(dish.price, dish.currency)}
                   </p>
                 </div>
                 <AvailabilitySwitch available={dish.is_available} onToggle={() => handleToggleStock(dish.id)} compact />
