@@ -13,13 +13,16 @@ import {
   Tablet,
   ExternalLink,
   Volume2,
+  LogOut,
 } from 'lucide-react';
 import { playOrderChime, playTapSound } from '@/lib/sound';
 import { DataService } from '@/lib/data-service';
 import { InstallAppButton } from '@/components/InstallAppButton';
+import { useAdminAuth } from './AdminAuthGate';
 
 export const AdminNavbar: React.FC = () => {
   const pathname = usePathname();
+  const { email, signOut } = useAdminAuth();
   const [serverCallCount, setServerCallCount] = useState(0);
   const [billCount, setBillCount] = useState(0);
   const [activeOrderCount, setActiveOrderCount] = useState(0);
@@ -162,6 +165,20 @@ export const AdminNavbar: React.FC = () => {
             <span>Tester le son</span>
           </button>
           <InstallAppButton variant="sidebar" />
+          {email && (
+            <div className="mt-2 pt-3 border-t border-white/[0.06]">
+              <p className="px-3 text-[11px] text-slate-500 truncate" title={email}>
+                Connecté : {email}
+              </p>
+              <button
+                onClick={signOut}
+                className="w-full mt-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/[0.04] transition"
+              >
+                <LogOut className="w-[18px] h-[18px]" />
+                <span>Se déconnecter</span>
+              </button>
+            </div>
+          )}
         </div>
       </aside>
 
@@ -170,13 +187,25 @@ export const AdminNavbar: React.FC = () => {
         <div className="relative h-8 w-32">
           <Image src="/logo.png" alt="Mat House Restaurant" fill className="object-contain object-left" priority />
         </div>
-        <Link
-          href="/"
-          target="_blank"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-200 px-3 h-8 rounded-lg bg-white/10"
-        >
-          <Tablet className="w-3.5 h-3.5" /> Écran client
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/"
+            target="_blank"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-200 px-3 h-8 rounded-lg bg-white/10"
+          >
+            <Tablet className="w-3.5 h-3.5" /> Écran client
+          </Link>
+          {email && (
+            <button
+              onClick={signOut}
+              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 text-slate-200"
+              aria-label="Se déconnecter"
+              title="Se déconnecter"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </header>
       <nav
         className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 grid grid-cols-5 shadow-[0_-4px_16px_rgba(15,23,42,0.06)]"
