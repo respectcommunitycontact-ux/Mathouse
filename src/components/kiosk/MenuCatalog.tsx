@@ -21,6 +21,7 @@ import {
   Hand,
 } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
+import { placeLabel } from '@/lib/places';
 import { CATEGORY_META, MENU_CATEGORIES } from '@/lib/menu-config';
 import { formatMoney } from '@/lib/money';
 
@@ -39,7 +40,7 @@ type BookPageModel =
   | { kind: 'back' };
 
 export const MenuCatalog: React.FC = () => {
-  const { config, peopleCount, callWaiter, selectedGuestForAdd } = useTabletStore();
+  const { config, guestMode, peopleCount, callWaiter, selectedGuestForAdd } = useTabletStore();
   const { addItem, getTotalItems } = useCartStore();
   const cartHasItems = getTotalItems() > 0;
 
@@ -257,7 +258,7 @@ export const MenuCatalog: React.FC = () => {
       <p className="mt-3 text-[11px] tracking-[0.35em] uppercase text-[#D4AF37]/85 font-semibold">La Carte</p>
 
       <div className="mt-10 px-5 py-1.5 rounded-full border border-[#D4AF37]/50 text-[#F5E6B3] text-sm font-bold tracking-widest">
-        TABLE {config.tableNumber}
+        {placeLabel(config.tableNumber).toUpperCase()}
       </div>
 
       <div className="absolute bottom-12 left-0 right-0 flex items-center justify-center gap-2 text-[#F5E6B3]/80 text-[13px] animate-pulse-slow">
@@ -445,7 +446,7 @@ export const MenuCatalog: React.FC = () => {
           </div>
 
           <div className="px-3 py-1 rounded-full bg-[#E85D04]/15 border border-[#E85D04]/40 text-[#FAA307] font-extrabold text-xs tracking-wider shrink-0 shadow-sm">
-            TABLE {config.tableNumber}
+            {placeLabel(config.tableNumber).toUpperCase()}
           </div>
 
           <div className="hidden md:flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold">
@@ -482,10 +483,10 @@ export const MenuCatalog: React.FC = () => {
               ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 animate-pulse shadow-emerald-500/20'
               : 'bg-[#121824]/80 text-slate-200 border-white/10 hover:border-[#E85D04]/40 active:scale-95'
           }`}
-          title="Appeler un serveur à votre table"
+          title={guestMode ? 'Contacter le restaurant' : 'Appeler un serveur à votre table'}
         >
           <Bell className={`w-4 h-4 ${waiterCalled ? 'text-emerald-400 rotate-12' : 'text-[#FAA307]'}`} />
-          <span className="hidden md:inline">{waiterCalled ? 'Serveur prévenu' : 'Serveur'}</span>
+          <span className="hidden md:inline">{waiterCalled ? 'Prévenu' : guestMode ? 'Restaurant' : 'Serveur'}</span>
         </button>
       </header>
 

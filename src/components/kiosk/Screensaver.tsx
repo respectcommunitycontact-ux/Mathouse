@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { placeLabel } from '@/lib/places';
 import Image from 'next/image';
 import { SCREENSAVER_IMAGES } from '@/lib/mock-data';
 import { Sparkles } from 'lucide-react';
@@ -73,7 +74,7 @@ export const Screensaver: React.FC<ScreensaverProps> = ({ isOpen, onWake, tableN
 
         <div className="px-3 sm:px-5 py-1.5 sm:py-2 rounded-full bg-black/70 border border-[#D4AF37]/40 backdrop-blur-md shadow-lg shrink-0 whitespace-nowrap">
           <span className="text-xs sm:text-sm font-bold tracking-wider text-[#D4AF37] uppercase whitespace-nowrap">
-            Table {tableNumber}
+            {placeLabel(tableNumber)}
           </span>
         </div>
       </div>

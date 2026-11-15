@@ -6,6 +6,7 @@ import { useTabletStore } from '@/store/tabletStore';
 import { DataService } from '@/lib/data-service';
 import { ArrowLeft, Send, User, MessageCircle, AlertCircle, Sparkles } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
+import { placeLabel } from '@/lib/places';
 import { formatTotals } from '@/lib/money';
 
 export const CheckoutModal: React.FC = () => {
@@ -121,7 +122,7 @@ export const CheckoutModal: React.FC = () => {
         </button>
 
         <div className="px-4 py-1.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#E5C158] text-xs font-extrabold uppercase tracking-widest shadow-gold-subtle">
-          <span>TABLE {config.tableNumber} &bull; VALIDATION</span>
+          <span>{placeLabel(config.tableNumber).toUpperCase()} &bull; VALIDATION</span>
         </div>
       </div>
 

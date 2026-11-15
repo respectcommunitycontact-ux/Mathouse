@@ -18,6 +18,8 @@ interface TabletState {
 
   // Session & Customer Flow
   activeScreen: KioskScreen;
+  /** true on a customer's own phone (opened from a room / apartment QR code) */
+  guestMode: boolean;
   peopleCount: number;
   selectedGuestForAdd: string; // "Personne 1", "Personne 2"...
   customerSession: CustomerSession | null;
@@ -39,6 +41,8 @@ interface TabletState {
   fullResetSession: () => void;
   /** La serveuse choisit la table : nouvelle session client propre, puis écran d'accueil client */
   startTableSession: (tableNumber: number) => void;
+  /** Customer phone opened from a QR code: fixed place, no waitress steps */
+  startGuestSession: (placeNumber: number) => void;
   /** Le client rend la tablette : on vide tout et on revient au choix de table */
   handBackToWaiter: () => void;
   callWaiter: () => Promise<void>;
@@ -60,6 +64,7 @@ export const useTabletStore = create<TabletState>((set, get) => ({
   isAdminPinOpen: false,
   isSettingsOpen: false,
   activeScreen: 'table-picker',
+  guestMode: false,
   peopleCount: 1,
   selectedGuestForAdd: 'Personne 1',
   customerSession: null,
@@ -167,11 +172,23 @@ export const useTabletStore = create<TabletState>((set, get) => ({
     });
   },
 
+  startGuestSession: (placeNumber: number) => {
+    set({ guestMode: true });
+    get().startTableSession(placeNumber);
+  },
+
   handBackToWaiter: () => {
+    if (get().guestMode) {
+      // A customer phone never goes back to the waitress screen
+      useCartStore.getState().clearCart();
+      set({ activeScreen: 'welcome', selectedGuestForAdd: 'Personne 1' });
+      return;
+    }
     useCartStore.getState().clearCart();
     useCartStore.getState().setDrawerOpen(false);
     set({
       activeScreen: 'table-picker',
+  guestMode: false,
       peopleCount: 1,
       customerSession: null,
       selectedGuestForAdd: 'Personne 1',

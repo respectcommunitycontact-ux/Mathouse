@@ -10,7 +10,7 @@
 -- car ce sont ceux que l'application génère.
 -- =======================================================
 
--- 1. TABLES DU RESTAURANT (une ligne par table / tablette)
+-- 1. LIEUX QUI COMMANDENT : tables (1-7), chambres (101-104), appartements (201-204)
 CREATE TABLE IF NOT EXISTS public.tables (
     id TEXT PRIMARY KEY,
     number INTEGER NOT NULL UNIQUE,
@@ -80,24 +80,23 @@ CREATE TABLE IF NOT EXISTS public.order_items (
 CREATE INDEX IF NOT EXISTS orders_created_at_idx ON public.orders (created_at DESC);
 CREATE INDEX IF NOT EXISTS order_items_order_id_idx ON public.order_items (order_id);
 
--- 6. DONNÉES DE DÉPART : 16 tables
+-- 6. DONNÉES DE DÉPART : 7 tables (1-7), 4 chambres (101-104), 4 appartements (201-204)
 INSERT INTO public.tables (id, number, tablet_id) VALUES
-  ('table-1', 1, 'TAB-01'),
-  ('table-2', 2, 'TAB-02'),
-  ('table-3', 3, 'TAB-03'),
-  ('table-4', 4, 'TAB-04'),
-  ('table-5', 5, 'TAB-05'),
-  ('table-6', 6, 'TAB-06'),
-  ('table-7', 7, 'TAB-07'),
-  ('table-8', 8, 'TAB-08'),
-  ('table-9', 9, 'TAB-09'),
-  ('table-10', 10, 'TAB-10'),
-  ('table-11', 11, 'TAB-11'),
-  ('table-12', 12, 'TAB-12'),
-  ('table-13', 13, 'TAB-13'),
-  ('table-14', 14, 'TAB-14'),
-  ('table-15', 15, 'TAB-15'),
-  ('table-16', 16, 'TAB-16')
+  ('table-1', 1, 'table-1'),
+  ('table-2', 2, 'table-2'),
+  ('table-3', 3, 'table-3'),
+  ('table-4', 4, 'table-4'),
+  ('table-5', 5, 'table-5'),
+  ('table-6', 6, 'table-6'),
+  ('table-7', 7, 'table-7'),
+  ('table-101', 101, 'chambre-1'),
+  ('table-102', 102, 'chambre-2'),
+  ('table-103', 103, 'chambre-3'),
+  ('table-104', 104, 'chambre-4'),
+  ('table-201', 201, 'appartement-1'),
+  ('table-202', 202, 'appartement-2'),
+  ('table-203', 203, 'appartement-3'),
+  ('table-204', 204, 'appartement-4')
 ON CONFLICT (number) DO NOTHING;
 
 -- 7. DONNÉES DE DÉPART : la carte (68 articles)

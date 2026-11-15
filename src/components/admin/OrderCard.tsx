@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { Order, OrderStatus } from '@/types';
-import { Clock, CheckCheck, RotateCcw, AlertTriangle, MessageCircle, User, Users } from 'lucide-react';
+import { Clock, CheckCheck, RotateCcw, AlertTriangle, MessageCircle, User, Users, BellRing } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
 import { btn, formatMoney, formatTotals } from './ui';
+import { placeByNumber, isDelivery } from '@/lib/places';
 
 interface OrderCardProps {
   order: Order;
@@ -34,6 +35,8 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus }) =
   const groups = Object.entries(groupedItems);
 
   const isServed = order.status === 'servie';
+  const place = placeByNumber(order.table_number);
+  const delivery = isDelivery(order.table_number);
   const late = !isServed && elapsedMinutes > 20;
   const warn = !isServed && elapsedMinutes > 10;
 
@@ -63,12 +66,24 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus }) =
       {/* Header */}
       <header className="px-4 py-3 flex items-center justify-between gap-3 border-b border-slate-100">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-12 h-12 rounded-lg bg-slate-900 text-white flex flex-col items-center justify-center shrink-0">
-            <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-400 leading-none">Table</span>
-            <span className="text-lg font-bold leading-tight">{order.table_number}</span>
+          <div
+            className={`w-14 h-12 rounded-lg text-white flex flex-col items-center justify-center shrink-0 ${
+              delivery ? 'bg-[#C2410C]' : 'bg-slate-900'
+            }`}
+            title={place?.label}
+          >
+            <span className="text-[9px] font-semibold uppercase tracking-wider text-white/70 leading-none">
+              {place?.kindLabel ?? 'Table'}
+            </span>
+            <span className="text-lg font-bold leading-tight">{place?.index ?? order.table_number}</span>
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-slate-900 truncate">{order.customer?.full_name || 'Client'}</p>
+            {delivery && (
+              <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] font-semibold text-[#C2410C]">
+                <BellRing className="w-3 h-3" />À livrer en {place?.label.toLowerCase()}
+              </p>
+            )}
             <p className="text-xs text-slate-500 flex items-center gap-1.5">
               <span>{order.order_number}</span>
               <span>·</span>

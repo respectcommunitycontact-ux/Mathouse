@@ -14,6 +14,7 @@ import {
   ExternalLink,
   Volume2,
   LogOut,
+  QrCode,
 } from 'lucide-react';
 import { playOrderChime, playTapSound } from '@/lib/sound';
 import { DataService } from '@/lib/data-service';
@@ -63,7 +64,7 @@ export const AdminNavbar: React.FC = () => {
     },
     {
       href: '/admin/tables',
-      label: 'Salle',
+      label: 'Salle & chambres',
       shortLabel: 'Salle',
       hint: 'Appels serveur et additions',
       icon: LayoutGrid,
@@ -75,6 +76,14 @@ export const AdminNavbar: React.FC = () => {
       shortLabel: 'Carte',
       hint: 'Plats, prix et ruptures',
       icon: UtensilsCrossed,
+      badge: null,
+    },
+    {
+      href: '/admin/qr-codes',
+      label: 'QR codes',
+      shortLabel: 'QR',
+      hint: 'Chambres et appartements',
+      icon: QrCode,
       badge: null,
     },
     {
@@ -208,7 +217,7 @@ export const AdminNavbar: React.FC = () => {
         </div>
       </header>
       <nav
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 grid grid-cols-5 shadow-[0_-4px_16px_rgba(15,23,42,0.06)]"
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 grid grid-cols-6 shadow-[0_-4px_16px_rgba(15,23,42,0.06)]"
         aria-label="Navigation administration"
       >
         {navLinks.map((item) => {

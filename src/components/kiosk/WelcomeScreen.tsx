@@ -6,9 +6,10 @@ import { useTabletStore } from '@/store/tabletStore';
 import { User, Users, Bell, Sparkles, UtensilsCrossed, ArrowRight, ArrowLeftRight } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
 import { enterFullscreen } from '@/lib/pwa';
+import { placeLabel } from '@/lib/places';
 
 export const WelcomeScreen: React.FC = () => {
-  const { config, setPeopleCount, setActiveScreen, callWaiter, handBackToWaiter } = useTabletStore();
+  const { config, guestMode, setPeopleCount, setActiveScreen, callWaiter, handBackToWaiter } = useTabletStore();
   const [waiterCalled, setWaiterCalled] = useState(false);
 
   const handleSolo = () => {
@@ -61,7 +62,7 @@ export const WelcomeScreen: React.FC = () => {
         <div className="flex items-center gap-3 shrink-0">
           <div className="px-4 py-2 rounded-full bg-[#141B28]/90 border border-[#D4AF37]/35 text-[#E5C158] font-extrabold text-xs sm:text-sm tracking-wider shadow-sm flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
-            <span>Table {config.tableNumber}</span>
+            <span>{placeLabel(config.tableNumber)}</span>
           </div>
 
           <button
@@ -73,7 +74,7 @@ export const WelcomeScreen: React.FC = () => {
             }`}
           >
             <Bell className={`w-4 h-4 shrink-0 ${waiterCalled ? 'text-emerald-400 rotate-12' : 'text-[#D4AF37]'}`} />
-            <span className="hidden sm:inline">{waiterCalled ? 'Serveur Prévenu' : 'Appeler Serveur'}</span>
+            <span className="hidden sm:inline">{waiterCalled ? (guestMode ? 'Restaurant prévenu' : 'Serveur Prévenu') : guestMode ? 'Contacter le restaurant' : 'Appeler Serveur'}</span>
           </button>
         </div>
       </div>
@@ -88,11 +89,13 @@ export const WelcomeScreen: React.FC = () => {
 
         {/* Main Title */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif text-white tracking-tight mb-3 font-semibold drop-shadow-md">
-          Bienvenue à votre table
+          {guestMode ? 'Bienvenue' : 'Bienvenue à votre table'}
         </h1>
 
         <p className="text-slate-300 text-xs sm:text-base font-light max-w-lg mx-auto mb-8 leading-relaxed">
-          Découvrez notre carte d&apos;exception et composez vos commandes en toute simplicité.
+          {guestMode
+            ? 'Commandez au restaurant Mat House : votre commande vous est apportée directement.'
+            : 'Découvrez notre carte d’exception et composez vos commandes en toute simplicité.'}
         </p>
 
         {/* 2 Big Ergonomic Action Cards Centered */}
@@ -144,6 +147,7 @@ export const WelcomeScreen: React.FC = () => {
       {/* Bottom Footer Bar */}
       <div className="relative z-10 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-400/80 border-t border-white/[0.08] pt-3 shrink-0">
         <span className="font-serif italic text-slate-300">MAT HOUSE RESTAURANT</span>
+        {!guestMode && (
         <button
           type="button"
           onClick={() => {
@@ -156,6 +160,7 @@ export const WelcomeScreen: React.FC = () => {
           <ArrowLeftRight className="w-3.5 h-3.5" />
           Serveur : changer de table
         </button>
+        )}
       </div>
     </div>
   );

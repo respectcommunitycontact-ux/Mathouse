@@ -7,6 +7,7 @@ import { Order } from '@/types';
 import { CheckCircle2, Flame, Search, RefreshCw } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
 import { CountPill, EmptyState, PageContainer, PageHeader, btn, inputClass } from './ui';
+import { placeLabel } from '@/lib/places';
 
 type ColumnId = 'nouvelle' | 'servie';
 
@@ -23,7 +24,7 @@ export const KitchenKanban: React.FC = () => {
   const filteredOrders = orders.filter((o) => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
-    const matchesTable = `table ${o.table_number}`.includes(q) || String(o.table_number) === q;
+    const matchesTable = placeLabel(o.table_number).toLowerCase().includes(q) || String(o.table_number) === q;
     const matchesNumber = o.order_number.toLowerCase().includes(q);
     const matchesCustomer = o.customer?.full_name.toLowerCase().includes(q) || o.customer?.whatsapp.includes(q);
     return matchesTable || matchesNumber || matchesCustomer;

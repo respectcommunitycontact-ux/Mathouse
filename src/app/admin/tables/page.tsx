@@ -5,6 +5,7 @@ import { TableRecord, TableStatus } from '@/types';
 import { DataService } from '@/lib/data-service';
 import { Check, RotateCcw, LayoutGrid } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
+import { placeLabel } from '@/lib/places';
 import {
   Card,
   CountPill,
@@ -71,8 +72,8 @@ export default function TablesManagementPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Salle"
-        description="Chaque carte correspond à une table. Traitez les appels serveur et les additions, puis libérez la table quand les clients sont partis."
+        title="Salle & chambres"
+        description="Tables du restaurant, chambres et appartements. Traitez les appels et les additions, puis libérez la place quand les clients sont partis."
         meta={<CountPill>{tables.length - count('libre')} occupée(s) sur {tables.length}</CountPill>}
       />
 
@@ -108,7 +109,7 @@ export default function TablesManagementPage() {
             return (
               <Card key={tbl.id} className={`p-4 flex flex-col gap-3 ${s.card}`}>
                 <div>
-                  <p className="text-lg font-bold text-slate-900 leading-tight">Table {tbl.number}</p>
+                  <p className="text-lg font-bold text-slate-900 leading-tight">{placeLabel(tbl.number)}</p>
                   <div className="mt-1.5">
                     <StatusBadge status={tbl.status} />
                   </div>
