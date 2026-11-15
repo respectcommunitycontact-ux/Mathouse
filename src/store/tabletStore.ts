@@ -46,11 +46,11 @@ interface TabletState {
 }
 
 const DEFAULT_CONFIG: TabletConfig = {
-  tableNumber: 5,
-  tabletId: 'TAB-TABLE-05',
+  tableNumber: 1,
+  tabletId: 'TAB-TABLE-01',
   pinCode: '1234',
-  wifiSsid: 'RestoPro_Guest_5G',
-  wifiPassword: 'gourmetpassword',
+  wifiSsid: '',
+  wifiPassword: '',
   inactivityTimeoutSeconds: 60,
 };
 

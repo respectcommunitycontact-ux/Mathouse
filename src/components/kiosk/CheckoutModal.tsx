@@ -157,7 +157,7 @@ export const CheckoutModal: React.FC = () => {
             <input
               type="text"
               required
-              placeholder="Ex: Alexandre Dumas"
+              placeholder="Nom et prénom"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               className="w-full px-5 py-3.5 rounded-2xl bg-[#0B0E14] border border-white/15 text-white font-medium text-sm placeholder-slate-500 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]/50 transition-all duration-300"
@@ -173,7 +173,7 @@ export const CheckoutModal: React.FC = () => {
             <input
               type="tel"
               required
-              placeholder="Ex: 06 12 34 56 78 ou +33612345678"
+              placeholder="Ex : +243 …"
               value={whatsapp}
               onChange={(e) => setWhatsapp(e.target.value)}
               className="w-full px-5 py-3.5 rounded-2xl bg-[#0B0E14] border border-white/15 text-white font-medium text-sm placeholder-slate-500 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]/50 transition-all duration-300"

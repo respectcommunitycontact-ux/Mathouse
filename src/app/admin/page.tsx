@@ -186,7 +186,7 @@ export default function AdminDashboardPage() {
                   </span>
                   <div>
                     <p className="text-sm font-semibold text-slate-900">Table {t.number} demande l’addition</p>
-                    <p className="text-xs text-slate-500">Une fois réglée, libérez la table depuis « Salle & tablettes ».</p>
+                    <p className="text-xs text-slate-500">Une fois réglée, libérez la table depuis « Salle ».</p>
                   </div>
                 </div>
                 <Link href="/admin/tables" className={btn.secondary}>

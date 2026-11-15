@@ -127,7 +127,7 @@ export const OrderConfirmation: React.FC = () => {
             <p className="text-xs text-slate-300 flex items-center gap-2 font-light">
               <Sparkles className="w-4 h-4 text-[#D4AF37] flex-shrink-0" />
               <span>
-                Suivi disponible via WhatsApp au {customerSession?.whatsapp || 'numéro renseigné'}.
+                Numéro enregistré : {customerSession?.whatsapp || '—'}
               </span>
             </p>
           </div>

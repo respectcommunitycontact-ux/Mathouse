@@ -3,10 +3,10 @@ import { INITIAL_MENU_ITEMS, INITIAL_TABLES, INITIAL_CUSTOMERS, INITIAL_ORDERS }
 import { supabase, isSupabaseConfigured } from './supabase';
 
 const STORAGE_KEYS = {
-  ORDERS: 'resto_orders_v2',
+  ORDERS: 'resto_orders_v3',
   MENU: 'resto_menu_v2',
-  CUSTOMERS: 'resto_customers_v1',
-  TABLES: 'resto_tables_v1',
+  CUSTOMERS: 'resto_customers_v2',
+  TABLES: 'resto_tables_v2',
   CONFIG: 'resto_tablet_config_v1',
 };
 

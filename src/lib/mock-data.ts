@@ -653,189 +653,19 @@ export const SCREENSAVER_IMAGES = [
   },
 ];
 
+/** Les 16 tables du restaurant, toutes libres au départ. */
 export const INITIAL_TABLES: TableRecord[] = Array.from({ length: 16 }, (_, i) => ({
   id: `table-${i + 1}`,
   number: i + 1,
-  tablet_id: `TAB-0${i + 1}`,
-  is_online: i % 5 !== 4, // plupart en ligne
-  battery_level: 95 - (i * 3) % 45, // batteries réalistes (80-95%)
-  status: i === 4 ? 'addition_demandee' : (i === 2 ? 'occupee' : 'libre'),
+  tablet_id: `TAB-${String(i + 1).padStart(2, '0')}`,
+  is_online: false,
+  battery_level: 100,
+  status: 'libre',
   updated_at: new Date().toISOString(),
 }));
 
-export const INITIAL_CUSTOMERS: Customer[] = [
-  {
-    id: 'c-1',
-    full_name: 'Alexandre Dumas',
-    whatsapp: '+33612345678',
-    notes: 'Client VIP - Préfère la table 5 en terrasse',
-    total_orders: 8,
-    last_visit: new Date(Date.now() - 86400000 * 2).toISOString(),
-    created_at: new Date(Date.now() - 86400000 * 45).toISOString(),
-  },
-  {
-    id: 'c-2',
-    full_name: 'Sophie Marceau',
-    whatsapp: '+33698765432',
-    notes: 'Allergie fruits à coque',
-    total_orders: 3,
-    last_visit: new Date(Date.now() - 86400000 * 5).toISOString(),
-    created_at: new Date(Date.now() - 86400000 * 20).toISOString(),
-  },
-  {
-    id: 'c-3',
-    full_name: 'Marc Veyrat',
-    whatsapp: '+33644556677',
-    notes: 'Passionné de truffe',
-    total_orders: 12,
-    last_visit: new Date(Date.now() - 86400000 * 1).toISOString(),
-    created_at: new Date(Date.now() - 86400000 * 90).toISOString(),
-  },
-];
+/** Aucun client fictif : la liste se remplit avec les vraies commandes. */
+export const INITIAL_CUSTOMERS: Customer[] = [];
 
-export const INITIAL_ORDERS: Order[] = [
-  {
-    id: "ord-100",
-    order_number: "CMD-099",
-    table_number: 1,
-    people_count: 2,
-    customer_id: "c-1",
-    customer: INITIAL_CUSTOMERS[0],
-    total: 46000,
-    status: "servie",
-    items: [
-      {
-        id: "item-ord-100-1",
-        order_id: "ord-100",
-        menu_item_id: "m-006",
-        item_name: "Poisson capitaine",
-        item_price: 30000,
-        quantity: 1,
-        person_label: "Toute la table"
-      },
-      {
-        id: "item-ord-100-2",
-        order_id: "ord-100",
-        menu_item_id: "m-034",
-        item_name: "Riz",
-        item_price: 5000,
-        quantity: 2,
-        person_label: "Toute la table"
-      },
-      {
-        id: "item-ord-100-3",
-        order_id: "ord-100",
-        menu_item_id: "m-045",
-        item_name: "Coca-Cola",
-        item_price: 3000,
-        quantity: 2,
-        person_label: "Toute la table"
-      }
-    ],
-    created_at: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
-    updated_at: new Date(Date.now() - 1000 * 60 * 20).toISOString()
-  },
-  {
-    id: "ord-101",
-    order_number: "CMD-001",
-    table_number: 3,
-    people_count: 2,
-    customer_id: "c-1",
-    customer: INITIAL_CUSTOMERS[0],
-    total: 70000,
-    status: "nouvelle",
-    notes: "Poulet bien grillé svp",
-    items: [
-      {
-        id: "item-ord-101-1",
-        order_id: "ord-101",
-        menu_item_id: "m-015",
-        item_name: "Poulet mayo",
-        item_price: 45000,
-        quantity: 1,
-        person_label: "Personne 1"
-      },
-      {
-        id: "item-ord-101-2",
-        order_id: "ord-101",
-        menu_item_id: "m-037",
-        item_name: "Frites",
-        item_price: 5000,
-        quantity: 1,
-        person_label: "Personne 1"
-      },
-      {
-        id: "item-ord-101-3",
-        order_id: "ord-101",
-        menu_item_id: "m-028",
-        item_name: "Pondu madesu",
-        item_price: 7000,
-        quantity: 1,
-        person_label: "Personne 2"
-      },
-      {
-        id: "item-ord-101-4",
-        order_id: "ord-101",
-        menu_item_id: "m-035",
-        item_name: "Fufu",
-        item_price: 3000,
-        quantity: 1,
-        person_label: "Personne 2"
-      },
-      {
-        id: "item-ord-101-5",
-        order_id: "ord-101",
-        menu_item_id: "m-050",
-        item_name: "Heineken",
-        item_price: 5000,
-        quantity: 2,
-        person_label: "Toute la table"
-      }
-    ],
-    created_at: new Date(Date.now() - 1000 * 60 * 7).toISOString(),
-    updated_at: new Date(Date.now() - 1000 * 60 * 2).toISOString()
-  },
-  {
-    id: "ord-102",
-    order_number: "CMD-002",
-    table_number: 5,
-    people_count: 4,
-    customer_id: "c-2",
-    customer: INITIAL_CUSTOMERS[1],
-    total: 174000,
-    total_usd: 10,
-    status: "nouvelle",
-    items: [
-      {
-        id: "item-ord-102-1",
-        order_id: "ord-102",
-        menu_item_id: "m-019",
-        item_name: "Planche Libota simple (6-7 pers.)",
-        item_price: 150000,
-        quantity: 1,
-        person_label: "Toute la table"
-      },
-      {
-        id: "item-ord-102-2",
-        order_id: "ord-102",
-        menu_item_id: "m-026",
-        item_name: "Saucisse de Goma",
-        item_price: 10,
-        currency: "USD",
-        quantity: 1,
-        person_label: "Personne 1"
-      },
-      {
-        id: "item-ord-102-3",
-        order_id: "ord-102",
-        menu_item_id: "m-064",
-        item_name: "Jus de bissap",
-        item_price: 6000,
-        quantity: 4,
-        person_label: "Toute la table"
-      }
-    ],
-    created_at: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
-    updated_at: new Date(Date.now() - 1000 * 60 * 0).toISOString()
-  }
-];
+/** Aucune commande fictive. */
+export const INITIAL_ORDERS: Order[] = [];
