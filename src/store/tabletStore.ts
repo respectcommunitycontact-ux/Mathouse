@@ -78,7 +78,6 @@ export const useTabletStore = create<TabletState>((set, get) => ({
         localStorage.setItem('tableNumber', String(tableNumber));
         localStorage.setItem('tabletConfig', JSON.stringify(updated));
       }
-      DataService.updateTabletHeartbeat(tableNumber);
       return { config: updated };
     });
   },

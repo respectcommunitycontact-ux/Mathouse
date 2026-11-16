@@ -6,6 +6,7 @@ import { DataService } from '@/lib/data-service';
 import { Plus, Search, Pencil, X, Save, Utensils } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
 import { DishImageUploader } from '@/components/admin/DishImageUploader';
+import { sizedImage } from '@/lib/img';
 import {
   AvailabilitySwitch,
   Card,
@@ -170,7 +171,7 @@ export default function MenuManagementPage() {
                         className={`w-14 h-14 rounded-lg bg-slate-100 bg-cover bg-center shrink-0 border border-slate-200 flex items-center justify-center ${
                           dish.is_available ? '' : 'grayscale opacity-60'
                         }`}
-                        style={{ backgroundImage: dish.image_url ? `url(${dish.image_url})` : 'none' }}
+                        style={{ backgroundImage: dish.image_url ? `url(${sizedImage(dish.image_url, 56)})` : 'none' }}
                       >
                         {!dish.image_url && <Utensils className="w-5 h-5 text-slate-400" />}
                       </div>

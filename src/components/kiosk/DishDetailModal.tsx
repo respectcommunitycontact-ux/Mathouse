@@ -6,6 +6,7 @@ import { useTabletStore } from '@/store/tabletStore';
 import { useCartStore } from '@/store/cartStore';
 import { X, Plus, Minus, Check, Flame, Leaf, Sparkles, Clock, AlertCircle } from 'lucide-react';
 import { playTapSound } from '@/lib/sound';
+import { sizedImage } from '@/lib/img';
 import { formatMoney } from '@/lib/money';
 import confetti from 'canvas-confetti';
 
@@ -104,8 +105,9 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({ dish, isOpen, 
         {/* Top Image Banner with Close Button */}
         <div className="relative w-full h-52 sm:h-64 bg-[#1E202B] shrink-0">
           <img
-            src={dish.image_url}
+            src={sizedImage(dish.image_url, 600)}
             alt={dish.name}
+            decoding="async"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#15161E]/80 via-transparent to-black/40" />

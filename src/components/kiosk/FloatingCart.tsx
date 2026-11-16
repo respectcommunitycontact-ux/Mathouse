@@ -44,7 +44,7 @@ export const FloatingCart: React.FC = () => {
               playTapSound();
               setDrawerOpen(true);
             }}
-            className="glass-panel border border-[#D4AF37]/40 hover:border-[#D4AF37]/80 rounded-full p-2.5 sm:p-3.5 shadow-2xl backdrop-blur-2xl flex items-center justify-between cursor-pointer transition-all duration-300 active:scale-[0.99] glow-gold"
+            className="glass-panel border border-[#D4AF37]/40 hover:border-[#D4AF37]/80 rounded-full p-2.5 sm:p-3.5 shadow-2xl flex items-center justify-between cursor-pointer transition-all duration-300 active:scale-[0.99] glow-gold"
           >
             {/* Left: Bag Icon & Item Count */}
             <div className="flex items-center space-x-3 sm:space-x-4 pl-2">
@@ -91,7 +91,7 @@ export const FloatingCart: React.FC = () => {
 
       {/* 2. EXPANDABLE CART DRAWER MODAL */}
       {isDrawerOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex justify-end select-none animate-fade-in">
+        <div className="fixed inset-0 z-50 bg-black/90 flex justify-end select-none animate-fade-in">
           <div className="w-full max-w-xl bg-[#121824] h-full border-l border-[#D4AF37]/30 flex flex-col justify-between shadow-2xl">
             {/* Drawer Header */}
             <div className="p-6 border-b border-white/[0.08] flex items-center justify-between glass-panel">

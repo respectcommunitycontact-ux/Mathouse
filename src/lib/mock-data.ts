@@ -633,22 +633,22 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
 
 export const SCREENSAVER_IMAGES = [
   {
-    url: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=1920&q=85",
+    url: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=1600&q=65",
     title: "Poulet mayo",
     subtitle: "Le grand classique de la maison",
   },
   {
-    url: "https://images.unsplash.com/photo-1611171711912-e3f6b536f532?auto=format&fit=crop&w=1920&q=85",
+    url: "https://images.unsplash.com/photo-1611171711912-e3f6b536f532?auto=format&fit=crop&w=1600&q=65",
     title: "Poisson capitaine",
     subtitle: "Servi avec l’accompagnement de votre choix",
   },
   {
-    url: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1920&q=85",
+    url: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1600&q=65",
     title: "Planches Libota",
     subtitle: "À partager en famille, de 6 à 10 personnes",
   },
   {
-    url: "https://images.unsplash.com/photo-1626200419199-391ae4be7a41?auto=format&fit=crop&w=1920&q=85",
+    url: "https://images.unsplash.com/photo-1626200419199-391ae4be7a41?auto=format&fit=crop&w=1600&q=65",
     title: "Pondu & légumes du pays",
     subtitle: "La cuisine congolaise comme à la maison",
   },

@@ -1,6 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { Montserrat, Playfair_Display, Caveat } from "next/font/google";
 import { PwaProvider } from "@/components/PwaProvider";
+
+// Fonts are downloaded at build time and served with the site (faster than Google Fonts at runtime)
+const montserrat = Montserrat({ subsets: ["latin"], variable: "--font-montserrat", display: "swap" });
+const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair", display: "swap" });
+const caveat = Caveat({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-caveat", display: "swap" });
 
 export const metadata: Metadata = {
   title: "MAT HOUSE RESTAURANT - Tablette Menu & Kiosque",
@@ -37,7 +43,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className="dark h-full w-full">
+    <html lang="fr" className={`dark h-full w-full ${montserrat.variable} ${playfair.variable} ${caveat.variable}`}>
       <body className="h-full w-full overflow-hidden bg-slate-950 font-sans antialiased">
         <PwaProvider />
         {children}

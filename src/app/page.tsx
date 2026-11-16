@@ -49,29 +49,12 @@ export default function TabletKioskPage() {
         }
       }
 
-      // Real physical battery detection & heartbeat telemetry
-      const reportBattery = (level?: number, isCharging?: boolean) => {
-        DataService.updateTabletHeartbeat(config.tableNumber, level, isCharging);
-      };
-
-      if (typeof navigator !== 'undefined' && 'getBattery' in navigator) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (navigator as any).getBattery().then((battery: any) => {
-          const sync = () => {
-            const level = Math.round(battery.level * 100);
-            reportBattery(level, battery.charging);
-          };
-          sync();
-          battery.addEventListener('levelchange', sync);
-          battery.addEventListener('chargingchange', sync);
-        }).catch(() => {
-          reportBattery();
-        });
-      } else {
-        reportBattery();
-      }
+      // Load the menu now, so it is ready when the customer opens it
+      DataService.getMenuItems();
     }
-  }, [config.tableNumber, setTableNumber, updateConfig]);
+    // Run once when the tablet starts
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Inactivity tracking for Screensaver / Attract Mode (60s)
   const resetInactivityTimer = useCallback(() => {

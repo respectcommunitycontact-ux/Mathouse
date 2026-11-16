@@ -490,9 +490,13 @@ export const FlipBook: React.FC<FlipBookProps> = ({ pages, request, onPageChange
                 width: bookWidth,
                 height: pageH,
                 touchAction: 'pan-y',
-                filter: 'drop-shadow(0 28px 40px rgba(0,0,0,0.55))',
               }}
             >
+              <div
+                aria-hidden
+                className="absolute inset-0 pointer-events-none"
+                style={{ borderRadius: 16, boxShadow: '0 28px 50px -10px rgba(0,0,0,0.6)' }}
+              />
               <div
                 className={`absolute inset-0 ${isFlipping ? 'pointer-events-none' : ''}`}
                 style={{ perspective: `${Math.max(1600, bookWidth * 2.2)}px` }}

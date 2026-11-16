@@ -11,6 +11,33 @@ const STORAGE_KEYS = {
   CONFIG: 'resto_tablet_config_v1',
 };
 
+// ---------- Speed helpers ----------
+const MENU_CACHE_KEY = 'resto_menu_cache_v1';
+let menuMemory: MenuItem[] | null = null;
+let menuInFlight: Promise<MenuItem[]> | null = null;
+let tablesInFlight: Promise<TableRecord[]> | null = null;
+/** Database functions found missing once are not retried (saves a round trip each time). */
+const missingFunctions = new Set<string>();
+
+const readMenuCache = (): MenuItem[] | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(MENU_CACHE_KEY);
+    return raw ? (JSON.parse(raw) as MenuItem[]) : null;
+  } catch {
+    return null;
+  }
+};
+const writeMenuCache = (items: MenuItem[]) => {
+  menuMemory = items;
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(MENU_CACHE_KEY, JSON.stringify(items));
+  } catch {
+    /* storage full or blocked: memory cache is enough */
+  }
+};
+
 /** True when Supabase says the database function does not exist yet (security script not run). */
 const isMissingFunction = (error: { code?: string; message?: string }) =>
   error.code === 'PGRST202' || error.code === '42883' || /could not find the function/i.test(error.message ?? '');
@@ -42,19 +69,52 @@ export const DataService = {
   // --- MENU ITEMS ---
   async getMenuItems(): Promise<MenuItem[]> {
     if (isSupabaseConfigured && supabase) {
-      try {
-        const { data, error } = await supabase.from('menu_items').select('*').order('id');
-        if (!error && data && data.length > 0) return data as MenuItem[];
-      } catch (e) {
-        console.warn('Supabase fetch menu failed, using local storage fallback', e);
+      // Show the last known menu immediately, refresh it in the background
+      const cached = menuMemory ?? readMenuCache();
+      const refresh = this.fetchMenuFromDatabase();
+      if (cached && cached.length > 0) {
+        if (!menuMemory) menuMemory = cached;
+        refresh.then((fresh) => {
+          if (fresh && JSON.stringify(fresh) !== JSON.stringify(cached)) {
+            this.broadcast({ type: 'MENU_UPDATED', payload: null });
+          }
+        });
+        return cached;
       }
+      const fresh = await refresh;
+      if (fresh) return fresh;
     }
     if (typeof window === 'undefined') return INITIAL_MENU_ITEMS;
     const raw = localStorage.getItem(STORAGE_KEYS.MENU);
     return raw ? JSON.parse(raw) : INITIAL_MENU_ITEMS;
   },
 
+  /** One shared request at a time; result kept in memory and on the device. */
+  fetchMenuFromDatabase(): Promise<MenuItem[] | null> {
+    if (!supabase) return Promise.resolve(null);
+    if (menuInFlight) return menuInFlight;
+    const client = supabase;
+    menuInFlight = (async () => {
+      try {
+        const { data, error } = await client.from('menu_items').select('*').order('id');
+        if (!error && data && data.length > 0) {
+          writeMenuCache(data as MenuItem[]);
+          return data as MenuItem[];
+        }
+      } catch (e) {
+        console.warn('Supabase fetch menu failed', e);
+      }
+      return null;
+    })().finally(() => {
+      setTimeout(() => {
+        menuInFlight = null;
+      }, 2000);
+    }) as Promise<MenuItem[]>;
+    return menuInFlight;
+  },
+
   async updateMenuItem(item: MenuItem): Promise<void> {
+    if (menuMemory) writeMenuCache(menuMemory.map((m) => (m.id === item.id ? item : m)).concat(menuMemory.some((m) => m.id === item.id) ? [] : [item]));
     if (typeof window !== 'undefined') {
       const items = await this.getMenuItems();
       const idx = items.findIndex((m) => m.id === item.id);
@@ -131,7 +191,9 @@ export const DataService = {
 
     if (isSupabaseConfigured && supabase) {
       // Secure path: the database checks the order and takes prices from the menu itself.
-      const { data, error } = await supabase.rpc('place_order', {
+      const { data, error } = missingFunctions.has('place_order')
+        ? { data: null, error: { code: 'PGRST202', message: 'skipped' } }
+        : await supabase.rpc('place_order', {
         p: {
           id: newOrder.id,
           table_number: newOrder.table_number,
@@ -157,6 +219,7 @@ export const DataService = {
         newOrder.total = Number(res.total);
         newOrder.total_usd = res.total_usd ? Number(res.total_usd) : undefined;
       } else if (error && isMissingFunction(error)) {
+        missingFunctions.add('place_order');
         // Database not yet updated with the security script: previous behaviour
         await this.legacyInsertOrder(newOrder);
       } else {
@@ -311,6 +374,16 @@ export const DataService = {
   // --- TABLES ---
   /** Every place (tables, chambres, appartements) with its current status. */
   async getTables(): Promise<TableRecord[]> {
+    if (tablesInFlight) return tablesInFlight;
+    tablesInFlight = this.loadTables().finally(() => {
+      setTimeout(() => {
+        tablesInFlight = null;
+      }, 300);
+    });
+    return tablesInFlight;
+  },
+
+  async loadTables(): Promise<TableRecord[]> {
     let rows: TableRecord[] | null = null;
     if (isSupabaseConfigured && supabase) {
       try {
@@ -343,9 +416,13 @@ export const DataService = {
   },
 
   async updateTableStatus(tableNumber: number, status: TableRecord['status']): Promise<void> {
+    tablesInFlight = null; // next read must see this change
     if (isSupabaseConfigured && supabase) {
-      let { error } = await supabase.rpc('set_table_status', { p_number: tableNumber, p_status: status });
+      let { error } = missingFunctions.has('set_table_status')
+        ? { error: { code: 'PGRST202', message: 'skipped' } as { code: string; message: string } | null }
+        : await supabase.rpc('set_table_status', { p_number: tableNumber, p_status: status });
       if (error && isMissingFunction(error)) {
+        missingFunctions.add('set_table_status');
         ({ error } = await supabase
           .from('tables')
           .update({ status, updated_at: new Date().toISOString() })

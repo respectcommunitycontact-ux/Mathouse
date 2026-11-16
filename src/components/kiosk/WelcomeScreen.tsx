@@ -38,7 +38,7 @@ export const WelcomeScreen: React.FC = () => {
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-20 filter blur-[2px] scale-105 pointer-events-none"
         style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1920&q=80')`,
+          backgroundImage: `url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=960&q=50')`,
         }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-[#0B0E14] via-[#0B0E14]/85 to-[#0B0E14]/70 pointer-events-none" />

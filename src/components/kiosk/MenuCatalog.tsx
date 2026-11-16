@@ -24,6 +24,7 @@ import { playTapSound } from '@/lib/sound';
 import { placeLabel } from '@/lib/places';
 import { CATEGORY_META, MENU_CATEGORIES } from '@/lib/menu-config';
 import { formatMoney } from '@/lib/money';
+import { sizedImage } from '@/lib/img';
 
 const BOOK_CATEGORIES: MenuCategory[] = MENU_CATEGORIES;
 const CATEGORIES: ('Toutes' | MenuCategory)[] = ['Toutes', ...BOOK_CATEGORIES];
@@ -177,7 +178,7 @@ export const MenuCatalog: React.FC = () => {
         }`}
       >
         <div className="relative w-[58px] h-[58px] shrink-0 rounded-full overflow-hidden border-2 border-[#E85D04]/25 shadow-sm">
-          <img src={dish.image_url} alt={dish.name} className="w-full h-full object-cover" draggable={false} />
+          <img src={sizedImage(dish.image_url, 64)} alt={dish.name} loading="lazy" decoding="async" className="w-full h-full object-cover" draggable={false} />
         </div>
 
         <div className="flex-1 min-w-0">
@@ -291,7 +292,7 @@ export const MenuCatalog: React.FC = () => {
               className="w-full flex items-center gap-2.5 py-1.5 px-1.5 -mx-1.5 rounded-xl text-left transition-colors hover:bg-orange-500/[0.06] active:bg-orange-500/[0.12] disabled:opacity-35"
             >
               <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#E85D04]/25 shrink-0">
-                <img src={meta.headerImage} alt="" className="w-full h-full object-cover" draggable={false} />
+                <img src={sizedImage(meta.headerImage, 44)} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" draggable={false} />
               </div>
               <span className="flex-1 min-w-0 text-[13px] font-bold font-serif text-[#2B2D42] leading-tight [overflow-wrap:anywhere]">{category}</span>
               <span className="font-serif font-bold text-[#E85D04] text-[14px] w-6 text-right shrink-0">
@@ -316,7 +317,7 @@ export const MenuCatalog: React.FC = () => {
         {model.part === 0 ? (
           <div className="flex items-center gap-4 pb-4 mb-3 border-b border-[#E8E1D5]">
             <div className="w-[68px] h-[68px] rounded-full overflow-hidden border-2 border-[#E85D04]/40 ring-4 ring-[#E85D04]/10 shadow-md shrink-0">
-              <img src={meta.headerImage} alt={model.category} className="w-full h-full object-cover" draggable={false} />
+              <img src={sizedImage(meta.headerImage, 72)} alt={model.category} loading="lazy" decoding="async" className="w-full h-full object-cover" draggable={false} />
             </div>
             <div className="min-w-0 flex-1">
               <span className="text-[10px] uppercase tracking-[0.25em] text-[#8C8275] font-bold">{meta.english}</span>
@@ -383,8 +384,9 @@ export const MenuCatalog: React.FC = () => {
         >
           <div className="w-[200px] h-[200px] rounded-full overflow-hidden border-4 border-[#D4AF37]/60 shadow-2xl">
             <img
-              src={chefSpecial.image_url}
+              src={sizedImage(chefSpecial.image_url, 200)}
               alt={chefSpecial.name}
+              loading="lazy"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               draggable={false}
             />
@@ -425,15 +427,14 @@ export const MenuCatalog: React.FC = () => {
         <div
           className="absolute inset-0 bg-cover bg-center filter brightness-[0.22] contrast-[1.15] scale-105"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=2000&q=80')`,
+            backgroundImage: `url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=960&q=50')`,
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C11] via-[#121318]/90 to-[#121318]/95" />
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[850px] h-[550px] bg-amber-500/[0.06] rounded-full blur-3xl pointer-events-none" />
       </div>
 
       {/* Top Tablet Header Bar */}
-      <header className="glass-panel shrink-0 px-4 sm:px-8 py-2.5 flex items-center justify-between gap-3 z-30 border-b border-[#E85D04]/25 shadow-2xl backdrop-blur-xl">
+      <header className="glass-panel shrink-0 px-4 sm:px-8 py-2.5 flex items-center justify-between gap-3 z-30 border-b border-[#E85D04]/25 shadow-2xl">
         <div className="flex items-center space-x-3 sm:space-x-5 shrink-0">
           <div className="relative h-9 sm:h-11 w-32 sm:w-40 shrink-0">
             <Image
@@ -491,7 +492,7 @@ export const MenuCatalog: React.FC = () => {
       </header>
 
       {/* Category tabs: turn the book to the chosen section */}
-      <div className="shrink-0 px-4 sm:px-8 py-2.5 flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-white/5 bg-[#0e131d]/85 backdrop-blur-md z-20">
+      <div className="shrink-0 px-4 sm:px-8 py-2.5 flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-white/5 bg-[#0e131d] z-20">
         {CATEGORIES.map((cat) => {
           const isSelected = activeCategory === cat;
           const targetPage = cat === 'Toutes' ? 1 : firstPageOfCategory[cat];

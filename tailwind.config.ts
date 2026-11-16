@@ -50,16 +50,16 @@ const config: Config = {
         "card": "0 6px 24px -6px rgba(0, 0, 0, 0.5)",
       },
       fontFamily: {
-        serif: ["'Playfair Display'", "Georgia", "serif"],
+        serif: ["var(--font-playfair)", "'Playfair Display'", "Georgia", "serif"],
         sans: [
+          "var(--font-montserrat)",
           "'Montserrat'",
-          "'Plus Jakarta Sans'",
           "system-ui",
           "-apple-system",
           "BlinkMacSystemFont",
           "sans-serif"
         ],
-        script: ["'Caveat'", "cursive"],
+        script: ["var(--font-caveat)", "'Caveat'", "cursive"],
       },
       animation: {
         "fade-in": "fadeIn 0.3s ease-out forwards",
